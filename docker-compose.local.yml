@@ -1,0 +1,32 @@
+services:
+  mongodb:
+    image: mongo:6.0.8
+    ports:
+      - "27017:27017"
+    networks:
+      - levents_net
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: levents
+    volumes:
+      - mongodb_data_vol:/data/db
+      - mongodb_dump_vol:/data/dump
+networks:
+  levents_net:
+volumes:
+  mongodb_data_vol:
+  mongodb_dump_vol:
+# mongosh "mongodb://localhost:27017" --username root --authenticationDatabase admin
+# db.createUser(
+#   {
+#     user: "usrlevents",
+#     pwd: passwordPrompt(), //levents
+#     roles: [
+#       {
+#         role: "readWrite",
+#         db: "levents"
+#       }
+#     ]
+#   }
+# )
