@@ -68,7 +68,7 @@ async function generateOTP(params) {
           type: ERR_FORBIDDEN,
           code: 403,
           message: `You have exceeded the allowed number of times, or try again in ${process.appSettings.otpBlockedHour} hours.`,
-          viMessage: `Bạn đã vượt quá số lần cho phép, hay thử lại sau ${process.appSettings.otpBlockedHour} tiếng.`,
+          viMessage: `Bạn đã vượt quá số lần cho phép, hãy thử lại sau ${process.appSettings.otpBlockedHour} tiếng.`,
         })
       );
       result.meta.otpAttempts = user.OTPAttempts;
@@ -98,7 +98,7 @@ async function generateOTP(params) {
         type: ERR_FORBIDDEN,
         code: 403,
         message: `You have exceeded the allowed number of times, or try again in ${process.appSettings.otpBlockedHour} hours.`,
-        viMessage: `Bạn đã vượt quá số lần cho phép, hay thử lại sau ${process.appSettings.otpBlockedHour} tiếng.`,
+        viMessage: `Bạn đã vượt quá số lần cho phép, hãy thử lại sau ${process.appSettings.otpBlockedHour} tiếng.`,
       })
     );
     result.meta.otpAttempts = user.OTPAttempts;
