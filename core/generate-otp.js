@@ -67,8 +67,8 @@ async function generateOTP(params) {
         createError({
           type: ERR_FORBIDDEN,
           code: 403,
-          message: `You have exceeded the allowed number of times, or try again in ${appSettings.otpBlockedHour} hours.`,
-          viMessage: `Bạn đã vượt quá số lần cho phép, hay thử lại sau ${appSettings.otpBlockedHour} tiếng.`,
+          message: `You have exceeded the allowed number of times, or try again in ${process.appSettings.otpBlockedHour} hours.`,
+          viMessage: `Bạn đã vượt quá số lần cho phép, hay thử lại sau ${process.appSettings.otpBlockedHour} tiếng.`,
         })
       );
       result.meta.otpAttempts = user.OTPAttempts;
@@ -86,7 +86,9 @@ async function generateOTP(params) {
   if (user.OTPCreateAttempts >= process.appSettings.otpMaxCreateAttempts) {
     user.isBlocked = true;
     let blockUntil = new Date();
-    blockUntil.setHours(blockUntil.getHours() + appSettings.otpBlockedHour);
+    blockUntil.setHours(
+      blockUntil.getHours() + process.appSettings.otpBlockedHour
+    );
     user.blockUntil = blockUntil;
 
     await user.save();
@@ -95,8 +97,8 @@ async function generateOTP(params) {
       createError({
         type: ERR_FORBIDDEN,
         code: 403,
-        message: `You have exceeded the allowed number of times, or try again in ${appSettings.otpBlockedHour} hours.`,
-        viMessage: `Bạn đã vượt quá số lần cho phép, hay thử lại sau ${appSettings.otpBlockedHour} tiếng.`,
+        message: `You have exceeded the allowed number of times, or try again in ${process.appSettings.otpBlockedHour} hours.`,
+        viMessage: `Bạn đã vượt quá số lần cho phép, hay thử lại sau ${process.appSettings.otpBlockedHour} tiếng.`,
       })
     );
     result.meta.otpAttempts = user.OTPAttempts;
