@@ -362,7 +362,7 @@ router.post("/register", async (req, res) => {
       (!otherCustomer || !otherCustomer?.phone) &&
       !customer.phone
     ) {
-      const metafieldsObj = shopify.convertMetafieldsToObject(  
+      const metafieldsObj = shopify.convertMetafieldsToObject(
         customer.metafields || []
       );
 
