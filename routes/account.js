@@ -384,7 +384,8 @@ router.post("/register", async (req, res) => {
           ...params,
           needOTPVerification: true,
         };
-        result.meta.responseCode = responseCodes.conflictEmail;
+        result.meta.responseCode =
+          responseCodes.emailVerifiedButNeedPhoneVerification;
         res.status(409).json(result);
         return;
       }
@@ -426,6 +427,8 @@ router.post("/register", async (req, res) => {
         }
 
         result = beginOTPResult;
+        result.meta.responseCode =
+          responseCodes.emailVerifiedButNeedPhoneVerification;
         res.json(result);
         return;
       }
@@ -480,7 +483,8 @@ router.post("/register", async (req, res) => {
           ...params,
           needOTPVerification: true,
         };
-        result.meta.responseCode = responseCodes.conflictEmail;
+        result.meta.responseCode =
+          responseCodes.emailVerifiedButNeedPhoneVerification;
         res.status(409).json(result);
         return;
       }
