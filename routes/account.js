@@ -561,7 +561,7 @@ router.post("/register", async (req, res) => {
           params,
           res,
           result,
-          push: customer.phone,
+          phone: customer.phone,
         });
 
         if (!beginOTPResult) {
