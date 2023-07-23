@@ -362,11 +362,19 @@ router.post("/register", async (req, res) => {
       (!otherCustomer || !otherCustomer?.phone) &&
       !customer.phone
     ) {
-      if (!params.needOTPVerification) {
+      const metafieldsObj = shopify.convertMetafieldsToObject(  
+        customer.metafields || []
+      );
+
+      if (
+        metafieldsObj.needPhoneVerification &&
+        metafieldsObj.emailVerified &&
+        !params.needOTPVerification
+      ) {
         result.errors.push(
           createError({
             code: 409,
-            fields: ["phone"],
+            fields: ["email"],
             type: ERR_CONFLICT,
             message: "Email already exists",
             viMessage: "Email đã tồn tại",
@@ -378,6 +386,47 @@ router.post("/register", async (req, res) => {
         };
         result.meta.responseCode = responseCodes.conflictEmail;
         res.status(409).json(result);
+        return;
+      }
+
+      if (!params.needOTPVerification) {
+        result.errors.push(
+          createError({
+            code: 409,
+            fields: ["email"],
+            type: ERR_CONFLICT,
+            message: "Email already exists",
+            viMessage: "Email đã tồn tại",
+          })
+        );
+        result.data = {
+          ...params,
+          needOTPVerification: true,
+        };
+        result.meta.responseCode = responseCodes.conflictEmail;
+        res.status(409).json(result);
+        return;
+      }
+
+      if (
+        metafieldsObj.needPhoneVerification &&
+        metafieldsObj.emailVerified &&
+        params.needOTPVerification &&
+        !otpVerified
+      ) {
+        const beginOTPResult = await beginOTP({
+          params,
+          res,
+          result,
+          phone: params.phone,
+        });
+
+        if (!beginOTPResult) {
+          return;
+        }
+
+        result = beginOTPResult;
+        res.json(result);
         return;
       }
 
@@ -395,6 +444,44 @@ router.post("/register", async (req, res) => {
 
         result = beginOTPResult;
         res.json(result);
+        return;
+      }
+
+      if (
+        !metafieldsObj.needPhoneVerification &&
+        !metafieldsObj.emailVerified
+      ) {
+        const uocr = await shopify.updateOneCustomer({
+          id: customer.id,
+          metafields: [
+            {
+              namespace: "levents",
+              key: "needPhoneVerification",
+              type: "boolean",
+              value: "true",
+            },
+            {
+              namespace: "levents",
+              key: "emailVerified",
+              type: "boolean",
+              value: "true",
+            },
+          ],
+        });
+
+        if (Array.isArray(uocr.errors) && uocr.errors.length > 0) {
+          res.status(500).json(uocr);
+          return;
+        }
+
+        delete params.otpEmail;
+        delete params.otp;
+        result.data = {
+          ...params,
+          needOTPVerification: true,
+        };
+        result.meta.responseCode = responseCodes.conflictEmail;
+        res.status(409).json(result);
         return;
       }
 

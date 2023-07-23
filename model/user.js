@@ -11,9 +11,6 @@ const userSchema = new mongoose.Schema({
   blockUntil: { type: Date },
 });
 
-userSchema.index({ email: 1}, { unique: true, sparse: true });
-userSchema.index({ phone: 1}, { unique: true, sparse: true });
-
 const User = mongoose.model("User", userSchema);
 
 module.exports = {

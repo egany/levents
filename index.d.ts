@@ -170,6 +170,13 @@ declare global {
 
       interface GenerateAccountActivationUrlResult
         extends Core.Result<{ accountActivationUrl: string }> {}
+
+      interface DeleteOneMetafieldParams {
+        id: string;
+      }
+
+      interface DeleteOneMetafieldResult
+        extends Core.Result<{ deletedId: string }> {}
     }
 
     interface VerifyOTPParams {
