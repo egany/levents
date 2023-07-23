@@ -530,6 +530,62 @@ router.post("/register", async (req, res) => {
       return;
     }
 
+    if (
+      customer.email === params.email &&
+      customer.phone &&
+      (!otherCustomer ||
+        !otherCustomer?.phone ||
+        !helper.comparePhoneNumber(customer.phone, otherCustomer?.phone))
+    ) {
+      if (!params.needOTPVerification) {
+        result.errors.push(
+          createError({
+            code: 409,
+            fields: ["phone"],
+            type: ERR_CONFLICT,
+            message: "Phone already exists",
+            viMessage: "Số điện đã tồn tại",
+          })
+        );
+        result.data = {
+          ...params,
+          needOTPVerification: true,
+        };
+        result.meta.responseCode = responseCodes.conflictPhone;
+        res.status(409).json(result);
+        return;
+      }
+
+      if (params.needOTPVerification && !otpVerified) {
+        const beginOTPResult = await beginOTP({
+          params,
+          res,
+          result,
+          push: customer.phone,
+        });
+
+        if (!beginOTPResult) {
+          return;
+        }
+
+        result = beginOTPResult;
+        res.json(result);
+        return;
+      }
+
+      let fullName = helper.makeFullName(customer.firstName, customer.lastName);
+      fullName = fullName !== "" ? fullName : params.name;
+
+      res.json({
+        data: {
+          ...customer,
+          name: fullName,
+        },
+        errors: [],
+      });
+      return;
+    }
+
     // Có phone và email nhưng không cùng tài khoảng
     if (
       customer.email &&
@@ -603,6 +659,15 @@ router.post("/register", async (req, res) => {
       });
       return;
     }
+
+    console.log("==========Not in case above==========");
+    console.log({ customer });
+    console.log("---------");
+    console.log({ params });
+    console.log("----------");
+    console.log({ otherCustomer });
+    console.log("---------");
+    console.log({ otpVerified });
   } catch (error) {
     console.error(error);
     result.errors(createError({}));
