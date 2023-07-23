@@ -25,6 +25,10 @@ const {
   OTP_EXPIRES,
 
   MONGO_CONNECTION_STRING,
+
+  JUDGE_ME_URL,
+  JUDGE_ME_PRIVATE_TOKEN,
+  JUDGE_ME_PUBLIC_TOKEN,
 } = process.env;
 
 process.appSettings = {
@@ -54,4 +58,8 @@ process.appSettings = {
   otpExpires: OTP_EXPIRES ? Number.parseInt(OTP_EXPIRES) : 5,
 
   mongoConnectionString: MONGO_CONNECTION_STRING,
+
+  judgeMeUrl: JUDGE_ME_URL,
+  judgeMePrivateToken: JUDGE_ME_PRIVATE_TOKEN,
+  judgeMePublicToken: JUDGE_ME_PUBLIC_TOKEN,
 };

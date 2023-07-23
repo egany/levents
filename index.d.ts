@@ -78,6 +78,10 @@ declare global {
         otpExpires: number;
 
         mongoConnectionString: string;
+
+        judgeMeUrl: string;
+        judgeMePrivateToken: string;
+        judgeMePublicToken: string;
       }
 
       interface Meta {

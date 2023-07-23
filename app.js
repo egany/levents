@@ -7,6 +7,7 @@ const logger = require("morgan");
 
 const accountRouter = require("./routes/account");
 const locationRouter = require("./routes/location");
+const judgeMeRouter = require("./routes/judge-me");
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/accounts", accountRouter);
 app.use("/locations", locationRouter);
+app.use("/judge-me", judgeMeRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
