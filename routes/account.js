@@ -98,6 +98,9 @@ router.post("/register", async (req, res) => {
     }
 
     let customer = rocr.data ? { ...rocr.data } : null;
+    metafieldsObj = shopify.convertMetafieldsToObject(
+      customer?.metafields || []
+    );
 
     // Chưa có tài khoản
     if (!customer) {
@@ -165,6 +168,9 @@ router.post("/register", async (req, res) => {
       }
 
       customer = { ...coscr.data };
+      metafieldsObj = shopify.convertMetafieldsToObject(
+        customer?.metafields || []
+      );
 
       const gsaaur = await shopify.generateAccountActivationUrl({
         id: customer.id,
@@ -210,6 +216,21 @@ router.post("/register", async (req, res) => {
         })
       );
       result.meta.responseCode = responseCodes.accountBlocked;
+      res.status(409).json(result);
+      return;
+    }
+
+    if (customer.state === shopify.customerState.ENABLED) {
+      result.errors.push(
+        createError({
+          code: 403,
+          fields: [],
+          type: ERR_CONFLICT,
+          message: "Account already exists",
+          viMessage: "Tài khoản này đã tồn tại",
+        })
+      );
+      result.meta.responseCode = responseCodes.hasAClassicAccountWithEmail;
       res.status(409).json(result);
       return;
     }
@@ -327,6 +348,9 @@ router.post("/register", async (req, res) => {
         }
 
         customer = { ...uocr.data };
+        metafieldsObj = shopify.convertMetafieldsToObject(
+          customer?.metafields || []
+        );
       }
 
       let accountActivationUrl;
@@ -364,22 +388,33 @@ router.post("/register", async (req, res) => {
       (!otherCustomer || !otherCustomer?.phone) &&
       !customer.phone
     ) {
-      const metafieldsObj = shopify.convertMetafieldsToObject(
+      let metafieldsObj = shopify.convertMetafieldsToObject(
         customer.metafields || []
       );
 
       if (!metafieldsObj.otpSessionId && !params.sessionId) {
+        const _metafields = [];
+        const _metafieldsKeys = Object.keys(metafieldsObj);
+
+        if (_metafieldsKeys.includes("otpSessionId")) {
+          _metafields.push({
+            id: customer.metafields.find((m) => m.key === "otpSessionId").id,
+            namespace: "levents",
+            key: "otpSessionId",
+            type: "single_line_text_field",
+            value: result.meta.sessionId,
+          });
+        } else {
+          _metafields.push({
+            namespace: "levents",
+            key: "otpSessionId",
+            type: "single_line_text_field",
+            value: result.meta.sessionId,
+          });
+        }
         const uocr = await shopify.updateOneCustomer({
           id: customer.id,
-          metafields: [
-            {
-              id: customer.metafields.find((m) => m.key === "otpSessionId").id,
-              namespace: "levents",
-              key: "otpSessionId",
-              type: "single_line_text_field",
-              value: result.meta.sessionId,
-            },
-          ],
+          metafields: _metafields,
         });
 
         if (Array.isArray(uocr.errors) && uocr.errors.length > 0) {
@@ -388,6 +423,10 @@ router.post("/register", async (req, res) => {
         }
 
         customer = { ...uocr.data };
+
+        metafieldsObj = shopify.convertMetafieldsToObject(
+          customer?.metafields || []
+        );
       }
 
       if (
@@ -425,17 +464,28 @@ router.post("/register", async (req, res) => {
         !params.needOTPVerification &&
         !otpVerified
       ) {
+        const _metafields = [];
+        const _metafieldsKeys = Object.keys(metafieldsObj);
+
+        if (_metafieldsKeys.includes("otpSessionId")) {
+          _metafields.push({
+            id: customer.metafields.find((m) => m.key === "otpSessionId").id,
+            namespace: "levents",
+            key: "otpSessionId",
+            type: "single_line_text_field",
+            value: result.meta.sessionId,
+          });
+        } else {
+          _metafields.push({
+            namespace: "levents",
+            key: "otpSessionId",
+            type: "single_line_text_field",
+            value: result.meta.sessionId,
+          });
+        }
         const uocr = await shopify.updateOneCustomer({
           id: customer.id,
-          metafields: [
-            {
-              id: customer.metafields.find((m) => m.key === "otpSessionId").id,
-              namespace: "levents",
-              key: "otpSessionId",
-              type: "single_line_text_field",
-              value: result.meta.sessionId,
-            },
-          ],
+          metafields: _metafields,
         });
 
         if (Array.isArray(uocr.errors) && uocr.errors.length > 0) {
@@ -444,6 +494,9 @@ router.post("/register", async (req, res) => {
         }
 
         customer = { ...uocr.data };
+        metafieldsObj = shopify.convertMetafieldsToObject(
+          customer?.metafields || []
+        );
         delete params.otpEmail;
         delete params.otp;
         result.errors.push(
@@ -507,6 +560,9 @@ router.post("/register", async (req, res) => {
         }
 
         customer = { ...uocr.data };
+        metafieldsObj = shopify.convertMetafieldsToObject(
+          customer?.metafields || []
+        );
 
         result.errors.push(
           createError({
@@ -560,17 +616,29 @@ router.post("/register", async (req, res) => {
         params.needOTPVerification &&
         !otpVerified
       ) {
+        const _metafields = [];
+        const _metafieldsKeys = Object.keys(metafieldsObj);
+
+        if (_metafieldsKeys.includes("otpSessionId")) {
+          _metafields.push({
+            id: customer.metafields.find((m) => m.key === "otpSessionId").id,
+            namespace: "levents",
+            key: "otpSessionId",
+            type: "single_line_text_field",
+            value: result.meta.sessionId,
+          });
+        } else {
+          _metafields.push({
+            namespace: "levents",
+            key: "otpSessionId",
+            type: "single_line_text_field",
+            value: result.meta.sessionId,
+          });
+        }
+
         const uocr = await shopify.updateOneCustomer({
           id: customer.id,
-          metafields: [
-            {
-              id: customer.metafields.find((m) => m.key === "otpSessionId").id,
-              namespace: "levents",
-              key: "otpSessionId",
-              type: "single_line_text_field",
-              value: result.meta.sessionId,
-            },
-          ],
+          metafields: _metafields,
         });
 
         if (Array.isArray(uocr.errors) && uocr.errors.length > 0) {
@@ -579,6 +647,9 @@ router.post("/register", async (req, res) => {
         }
 
         customer = { ...uocr.data };
+        metafieldsObj = shopify.convertMetafieldsToObject(
+          customer?.metafields || []
+        );
         delete params.otpEmail;
         delete params.otp;
         result.errors.push(
@@ -688,6 +759,9 @@ router.post("/register", async (req, res) => {
         }
 
         customer = { ...uocr.data };
+        metafieldsObj = shopify.convertMetafieldsToObject(
+          customer?.metafields || []
+        );
         delete params.otpEmail;
         delete params.otp;
         result.data = {
@@ -711,6 +785,9 @@ router.post("/register", async (req, res) => {
       }
 
       customer = { ...uocr.data };
+      metafieldsObj = shopify.convertMetafieldsToObject(
+        customer?.metafields || []
+      );
 
       let accountActivationUrl;
 

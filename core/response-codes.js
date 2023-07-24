@@ -12,6 +12,7 @@ const responseCodes = {
   conflictPhone: 11,
   conflictEmail: 12,
   emailVerifiedButNeedPhoneVerification: 14,
+  hasAClassicAccountWithEmail: 15,
 };
 
 module.exports = {
