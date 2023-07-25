@@ -5,7 +5,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const logger = require("morgan");
 
-const accountRouter = require("./routes/account");
+const accountRouter = require("./routes/account-v2");
 const locationRouter = require("./routes/location");
 const judgeMeRouter = require("./routes/judge-me");
 

@@ -1,3 +1,9 @@
+import {
+  Request as ExpressRequest,
+  Response as ExpressResponse,
+  NextFunction as ExpressNextFunction,
+} from "express";
+
 export {};
 
 declare global {
@@ -94,6 +100,7 @@ declare global {
         otpTestMode?: number;
         otpBlockUntil?: Date;
         responseCode: number;
+        sessionId?: string;
       }
     }
 
@@ -118,6 +125,7 @@ declare global {
       }
 
       interface Metafield {
+        id: string;
         key: string;
         namespace: string;
         type: string;
@@ -246,6 +254,7 @@ declare global {
         gender?: string;
         otpPhone?: boolean;
         otpEmail?: boolean;
+        sessionId?: string;
         [key: string]: any;
       }
 
@@ -258,6 +267,30 @@ declare global {
             otpEmail?: boolean;
           }
         > {}
+
+      interface RegisterAccountContext {
+        result: RegisterAccountResponse;
+        otpVerified: boolean;
+        standardizedPhoneNumber?: string;
+        customer?: Shopify.Customer;
+      }
+
+      interface RegisterAccountRequest
+        extends Request<RegisterAccountContext, RegisterAccountParams> {}
+
+      interface Request<C, B> extends ExpressRequest {
+        context: C;
+        body: B;
+        session?: {
+          sessionId: string;
+          emailVerified?: boolean;
+          phoneVerified?: boolean;
+        };
+      }
+
+      interface Response extends ExpressResponse {}
+
+      interface NextFunction extends ExpressNextFunction {}
     }
   }
 }

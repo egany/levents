@@ -31,7 +31,9 @@ function generateSessionId() {
  * @param {string} n2
  */
 function comparePhoneNumber(n1, n2) {
-  return parsePhoneNumber(n1).number === parsePhoneNumber(n2).number;
+  return (
+    parsePhoneNumber(n1, "VN").number === parsePhoneNumber(n2, "VN").number
+  );
 }
 
 /**
