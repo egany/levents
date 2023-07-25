@@ -158,6 +158,50 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       return res.status(409).json(context.result);
     }
 
+    try {
+      if (
+        shopify.exportMetafieldId(context.customer.metafields, "registeredDate")
+      ) {
+        const _uocr = await shopify.updateOneCustomer({
+          id: context.customer.id,
+          metafields: [
+            {
+              id: shopify.exportMetafieldId(
+                context.customer.metafields,
+                "registeredDate"
+              ),
+              key: "registeredDate",
+              namespace: "levents",
+              type: "single_line_text_field",
+              value: new Date().toISOString(),
+            },
+          ],
+        });
+
+        if (_uocr.errors.length > 0) {
+          console.error(_uocr);
+        }
+      } else {
+        const _uocr = await shopify.updateOneCustomer({
+          id: context.customer.id,
+          metafields: [
+            {
+              key: "registeredDate",
+              namespace: "levents",
+              type: "single_line_text_field",
+              value: new Date().toISOString(),
+            },
+          ],
+        });
+
+        if (_uocr.errors.length > 0) {
+          console.error(_uocr);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
     });
@@ -170,7 +214,7 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       context.customer.firstName,
       context.customer.lastName
     );
-    fullName = fullName !== "" ? fullName : params.name;
+    fullName = fullName !== "" ? fullName : params.fullName;
 
     return res.json({
       data: {
@@ -319,6 +363,50 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
       context.customer = { ...uocr.data };
     }
 
+    try {
+      if (
+        shopify.exportMetafieldId(context.customer.metafields, "registeredDate")
+      ) {
+        const _uocr = await shopify.updateOneCustomer({
+          id: context.customer.id,
+          metafields: [
+            {
+              id: shopify.exportMetafieldId(
+                context.customer.metafields,
+                "registeredDate"
+              ),
+              key: "registeredDate",
+              namespace: "levents",
+              type: "single_line_text_field",
+              value: new Date().toISOString(),
+            },
+          ],
+        });
+
+        if (_uocr.errors.length > 0) {
+          console.error(_uocr);
+        }
+      } else {
+        const _uocr = await shopify.updateOneCustomer({
+          id: context.customer.id,
+          metafields: [
+            {
+              key: "registeredDate",
+              namespace: "levents",
+              type: "single_line_text_field",
+              value: new Date().toISOString(),
+            },
+          ],
+        });
+
+        if (_uocr.errors.length > 0) {
+          console.error(_uocr);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
     });
@@ -331,7 +419,7 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
       context.customer.firstName,
       context.customer.lastName
     );
-    fullName = fullName !== "" ? fullName : params.name;
+    fullName = fullName !== "" ? fullName : params.fullName;
 
     return res.json({
       data: {
@@ -493,6 +581,50 @@ async function _handleNotClassicAccountExistsWithNotSameEmailAndPhone(
       return res.json(context.result);
     }
 
+    try {
+      if (
+        shopify.exportMetafieldId(context.customer.metafields, "registeredDate")
+      ) {
+        const _uocr = await shopify.updateOneCustomer({
+          id: context.customer.id,
+          metafields: [
+            {
+              id: shopify.exportMetafieldId(
+                context.customer.metafields,
+                "registeredDate"
+              ),
+              key: "registeredDate",
+              namespace: "levents",
+              type: "single_line_text_field",
+              value: new Date().toISOString(),
+            },
+          ],
+        });
+
+        if (_uocr.errors.length > 0) {
+          console.error(_uocr);
+        }
+      } else {
+        const _uocr = await shopify.updateOneCustomer({
+          id: context.customer.id,
+          metafields: [
+            {
+              key: "registeredDate",
+              namespace: "levents",
+              type: "single_line_text_field",
+              value: new Date().toISOString(),
+            },
+          ],
+        });
+
+        if (_uocr.errors.length > 0) {
+          console.error(_uocr);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
     });
@@ -505,7 +637,7 @@ async function _handleNotClassicAccountExistsWithNotSameEmailAndPhone(
       context.customer.firstName,
       context.customer.lastName
     );
-    fullName = fullName !== "" ? fullName : params.name;
+    fullName = fullName !== "" ? fullName : params.fullName;
 
     return res.json({
       data: {
@@ -674,6 +806,50 @@ async function _handleNotClassicAccountExistsWithSameEmailAndPhone(
       return res.json(context.result);
     }
 
+    try {
+      if (
+        shopify.exportMetafieldId(context.customer.metafields, "registeredDate")
+      ) {
+        const _uocr = await shopify.updateOneCustomer({
+          id: context.customer.id,
+          metafields: [
+            {
+              id: shopify.exportMetafieldId(
+                context.customer.metafields,
+                "registeredDate"
+              ),
+              key: "registeredDate",
+              namespace: "levents",
+              type: "single_line_text_field",
+              value: new Date().toISOString(),
+            },
+          ],
+        });
+
+        if (_uocr.errors.length > 0) {
+          console.error(_uocr);
+        }
+      } else {
+        const _uocr = await shopify.updateOneCustomer({
+          id: context.customer.id,
+          metafields: [
+            {
+              key: "registeredDate",
+              namespace: "levents",
+              type: "single_line_text_field",
+              value: new Date().toISOString(),
+            },
+          ],
+        });
+
+        if (_uocr.errors.length > 0) {
+          console.error(_uocr);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
     });
@@ -686,7 +862,7 @@ async function _handleNotClassicAccountExistsWithSameEmailAndPhone(
       context.customer.firstName,
       context.customer.lastName
     );
-    fullName = fullName !== "" ? fullName : params.name;
+    fullName = fullName !== "" ? fullName : params.fullName;
 
     return res.json({
       data: {
@@ -798,7 +974,7 @@ async function _handleClassicAccountExistsWithSameEmailAndPhone(
     //   context.customer.firstName,
     //   context.customer.lastName
     // );
-    // fullName = fullName !== "" ? fullName : params.name;
+    // fullName = fullName !== "" ? fullName : params.fullName;
     // context.result.data = context.customer;
     // return res.json(context.result);
   } catch (error) {
@@ -881,10 +1057,10 @@ async function _handleAccountNotExists(req, res, next) {
       phone: params.phone,
       metafields: [
         {
-          key: "name",
+          key: "fullName",
           namespace: "levents",
           type: "single_line_text_field",
-          value: params.name,
+          value: params.fullName,
         },
         {
           key: "dateOfBirth",
@@ -899,13 +1075,13 @@ async function _handleAccountNotExists(req, res, next) {
           value: params.gender,
         },
         {
-          key: "registerDate",
+          key: "registeredDate",
           namespace: "levents",
           type: "single_line_text_field",
           value: new Date().toISOString(),
         },
       ],
-      ...helper.parseName(params.name),
+      ...helper.parseName(params.fullName),
     });
 
     if (coscr.errors.length > 0) {
@@ -926,7 +1102,7 @@ async function _handleAccountNotExists(req, res, next) {
       context.customer.firstName,
       context.customer.lastName
     );
-    fullName = fullName !== "" ? fullName : params.name;
+    fullName = fullName !== "" ? fullName : params.fullName;
 
     return res.json({
       data: {
