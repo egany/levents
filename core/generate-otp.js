@@ -11,7 +11,7 @@ const { responseCodes } = require("./response-codes");
 async function generateOTP(params) {
   /**@type {Levents.GenerateOTPResult} */
   let result = {
-    data: null,
+    data: {},
     errors: [],
     meta: {
       otpAttempts: 0,

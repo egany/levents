@@ -11,7 +11,7 @@ const { responseCodes } = require("./response-codes");
 async function verifyOTP(params) {
   /**@type {Levents.VerifyOTPResult} */
   let result = {
-    data: null,
+    data: {},
     errors: [],
     meta: {
       otpAttempts: 0,

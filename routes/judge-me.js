@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const axios = require("axios").default;
 const {
   createProxyMiddleware,
   fixRequestBody,
@@ -24,6 +25,24 @@ router.post(
 
 router.get(
   "/api/v1/reviews",
+  async (req, res, next) => {
+    const external_id = req.query.product_id;
+    const shop_domain = req.query.shop_domain;
+
+    try {
+      const { data } = await axios({
+        method: "GET",
+        url: `${process.appSettings.judgeMeUrl}/api/v1/products/-1?shop_domain=${shop_domain}&api_token=${process.appSettings.judgeMePrivateToken}&external_id=${external_id}`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      req.query.product_id = data.product.id;
+      return next();
+    } catch (error) {
+      return next(error);
+    }
+  },
   createProxyMiddleware({
     target: process.appSettings.judgeMeUrl,
     changeOrigin: true,
@@ -33,6 +52,11 @@ router.get(
         newPath,
         "api_token",
         process.appSettings.judgeMePrivateToken
+      );
+      newPath = updateQueryStringParameter(
+        newPath,
+        "product_id",
+        req.query.product_id
       );
       return newPath;
     },

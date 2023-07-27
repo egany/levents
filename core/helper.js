@@ -96,10 +96,40 @@ function makeFullName(firstName, lastName) {
   return fullName;
 }
 
+function makeCustomerResponseData(customer, params) {
+  let fullName = makeFullName(customer.firstName, customer.lastName);
+  fullName = fullName !== "" ? fullName : params.fullName;
+
+  return {
+    id: customer.id,
+    displayName: customer.displayName,
+    email: customer.email,
+    firstName: customer.firstName,
+    lastName: customer.lastName,
+    phone: customer.phone,
+    state: customer.state,
+    tags: customer.tags,
+    verifiedEmail: customer.verifiedEmail,
+    metafields: customer.metafields,
+    name: fullName,
+    accountActivationUrl: customer.accountActivationUrl,
+  };
+}
+
+async function waitWithPromise(ms = 500) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(ms);
+    }, ms);
+  });
+}
+
 module.exports = {
   parseName,
   makeFullName,
   comparePhoneNumber,
   generateSessionId,
   normalizePort,
+  makeCustomerResponseData,
+  waitWithPromise,
 };

@@ -262,6 +262,7 @@ declare global {
         extends Core.Result<
           Shopify.Customer & {
             accountActivationUrl: string;
+            sessionId?: string;
             needOTPVerification: boolean;
             otpPhone?: boolean;
             otpEmail?: boolean;
@@ -285,6 +286,9 @@ declare global {
           sessionId: string;
           emailVerified?: boolean;
           phoneVerified?: boolean;
+          phone?: string;
+          email?: string;
+          otpVerified?: boolean;
         };
       }
 

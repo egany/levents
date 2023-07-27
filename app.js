@@ -8,6 +8,7 @@ const logger = require("morgan");
 const accountRouter = require("./routes/account-v2");
 const locationRouter = require("./routes/location");
 const judgeMeRouter = require("./routes/judge-me");
+const toolsRouter = require("./routes/tools");
 
 const app = express();
 
@@ -26,6 +27,10 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/accounts", accountRouter);
 app.use("/locations", locationRouter);
 app.use("/judge-me", judgeMeRouter);
+
+if (process.env.API_TOOLS_ENABLE === "true") {
+  app.use("/tools", toolsRouter);
+}
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
