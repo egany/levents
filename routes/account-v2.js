@@ -493,7 +493,7 @@ async function _handleClassicAccountEmailNotExistsAndPhoneExists(
     context.result.errors.push(
       createError({
         code: 403,
-        fields: [],
+        fields: ["email", "phone"],
         type: ERR_CONFLICT,
         message: "Account already exists",
         viMessage: "Tài khoản này đã tồn tại",
