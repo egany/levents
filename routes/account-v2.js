@@ -81,7 +81,7 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       return next();
     }
 
-    if (!params.needOTPVerification && !req.session.otpVerified) {
+    if (!params.needOTPVerification) {
       context.result.errors.push(
         createError({
           code: 409,
@@ -93,14 +93,18 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       );
       context.result.data.needOTPVerification = true;
       context.result.meta.responseCode = responseCodes.conflictEmail;
+
+      await Session.findOneAndUpdate(
+        {
+          sessionId: req.session.sessionId,
+        },
+        { step: 1 }
+      );
+
       return res.status(409).json(context.result);
     }
 
-    if (
-      params.needOTPVerification &&
-      !req.session?.otpVerified &&
-      !req.session?.emailVerified
-    ) {
+    if (params.needOTPVerification && !req.session.emailVerified) {
       const beginOTPResult = await beginOTP({
         params,
         res,
@@ -113,82 +117,95 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       }
 
       context.result = beginOTPResult;
+
+      await Session.findOneAndUpdate(
+        {
+          sessionId: req.session.sessionId,
+        },
+        { step: 1 }
+      );
+
       return res.json(context.result);
     }
 
     if (
       params.needOTPVerification &&
-      !req.session?.otpVerified &&
       req.session.emailVerified &&
-      !req.session?.phoneVerified
+      !req.session.phoneVerified &&
+      req.session.step === 1
     ) {
-      const beginOTPResult = await beginOTP({
-        params,
-        res,
-        result: context.result,
-        phone: params.phone,
-      });
-
-      if (!beginOTPResult) {
-        return;
-      }
-
-      context.result.data = {
-        ...context.customer,
-        needOTPVerification: true,
-        sessionId: req.session.sessionId,
-        otpPhone: beginOTPResult.data.otpPhone,
-        otp: beginOTPResult.data.otp,
-      };
-
-      return res.status(409).json(context.result);
-    }
-
-    if (
-      !req.session.phone ||
-      !helper.comparePhoneNumber(req.session.phone, params.phone)
-    ) {
-      const beginOTPResult = await beginOTP({
-        params,
-        res,
-        result: context.result,
-        phone: params.phone,
-      });
-
-      if (!beginOTPResult) {
-        return;
-      }
-
-      context.result.data = {
-        ...context.customer,
-        needOTPVerification: true,
-        sessionId: req.session.sessionId,
-        otpPhone: beginOTPResult.data.otpPhone,
-        otp: beginOTPResult.data.otp,
-        phone: params.phone,
-      };
-
-      return res.status(409).json(context.result);
-    }
-
-    if (
-      req.session.phone &&
-      helper.comparePhoneNumber(req.session.phone, params.phone) &&
-      context.otpVerified
-    ) {
-      context.result.data = {
-        ...context.customer,
-        needOTPVerification: true,
-        sessionId: req.session.sessionId,
-        phone: req.session.phone,
-      };
-
       await Session.findOneAndUpdate(
-        { sessionId: req.session.sessionId },
-        { otpVerified: true }
+        {
+          sessionId: req.session.sessionId,
+        },
+        { step: 2 }
       );
 
-      return res.status(409).json(context.result);
+      context.result.data = {
+        ...context.customer,
+        needOTPVerification: true,
+        sessionId: req.session.sessionId,
+      };
+      return res.json(context.result);
+    }
+
+    if (
+      params.needOTPVerification &&
+      req.session.emailVerified &&
+      !req.session.phoneVerified &&
+      req.session.step === 2
+    ) {
+      await Session.findOneAndUpdate(
+        {
+          sessionId: req.session.sessionId,
+        },
+        { step: 3 }
+      );
+
+      const beginOTPResult = await beginOTP({
+        params,
+        res,
+        result: context.result,
+        phone: params.phone,
+      });
+
+      if (!beginOTPResult) {
+        return;
+      }
+
+      context.result.data = {
+        ...context.customer,
+        needOTPVerification: true,
+        sessionId: req.session.sessionId,
+        otpPhone: beginOTPResult.data.otpPhone,
+        otp: beginOTPResult.data.otp,
+        phone: params.phone,
+      };
+
+      return res.json(context.result);
+    }
+
+    if (
+      params.needOTPVerification &&
+      req.session.emailVerified &&
+      req.session.phoneVerified &&
+      req.session.step === 3
+    ) {
+      await Session.findOneAndUpdate(
+        {
+          sessionId: req.session.sessionId,
+        },
+        { step: 4 }
+      );
+
+      context.result.data = {
+        ...context.customer,
+        needOTPVerification: true,
+        sessionId: req.session.sessionId,
+        phone: params.phone,
+      };
+
+      return res.json(context.result);
     }
 
     const uocr = await shopify.updateOneCustomer({
@@ -331,8 +348,10 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
 
     if (
       params.needOTPVerification &&
-      !context.otpVerified &&
-      !req.session.otpVerified
+      (!req.session.phoneVerified ||
+        (params.phone &&
+          req.session?.phone &&
+          !helper.comparePhoneNumber(params.phone, req.session.phone)))
     ) {
       const beginOTPResult = await beginOTP({
         params,
@@ -349,66 +368,58 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
       return res.json(context.result);
     }
 
-    if (context.customer.email) {
+    if (req.session.phoneVerified && !req.session.otpVerified) {
+      context.result.data = helper.makeCustomerResponseData(
+        {
+          ...context.customer,
+        },
+        params
+      );
+
+      context.result.data.sessionId = req.session.sessionId;
       await Session.findOneAndUpdate(
         { sessionId: req.session.sessionId },
         { otpVerified: true }
       );
-    } else if (!context.customer.email && params.email) {
-      rocr = await shopify.readOneCustomer({
-        query: {
-          email: params.email,
-        },
-      });
+      return res.json(context.result);
+    }
 
-      if (rocr.errors.length > 0) {
-        return res.json(500).json(rocr);
-      }
-
-      if (rocr.data) {
-        context.result.errors.push(
-          createError({
-            code: 409,
-            fields: ["phone"],
-            type: ERR_CONFLICT,
-            message: "Email already exists",
-            viMessage: "Email đã tồn tại",
-          })
-        );
-        context.result.data.needOTPVerification = true;
-        context.result.data.sessionId = req.session.sessionId;
-        context.result.meta.responseCode =
-          responseCodes.conflictEmailWithPhoneExists;
-        return res.status(409).json(context.result);
-      }
-
-      if (!req.session.otpVerified) {
-        await Session.findOneAndUpdate(
-          { sessionId: req.session.sessionId },
-          { otpVerified: true }
-        );
-
-        context.result.data = helper.makeCustomerResponseData(
-          {
-            ...context.customer,
-          },
-          params
-        );
-
-        context.result.data.sessionId = req.session.sessionId;
-        return res.json(context.result);
-      }
-
-      const uocr = await shopify.updateOneCustomer({
-        id: context.customer.id,
+    rocr = await shopify.readOneCustomer({
+      query: {
         email: params.email,
-      });
+      },
+    });
 
-      if (uocr.errors.length > 0) {
-        return res.status(500).json(uocr);
-      }
+    if (rocr.errors.length > 0) {
+      return res.json(500).json(rocr);
+    }
 
-      context.customer = { ...uocr.data };
+    if (rocr.data) {
+      context.result.errors.push(
+        createError({
+          code: 409,
+          fields: ["phone"],
+          type: ERR_CONFLICT,
+          message: "Email already exists",
+          viMessage: "Email đã tồn tại",
+        })
+      );
+      context.result.data.needOTPVerification = true;
+      context.result.data.sessionId = req.session.sessionId;
+      context.result.meta.responseCode =
+        responseCodes.conflictEmailWithPhoneExists;
+      return res.status(409).json(context.result);
+    }
+
+    context.customer.email = params.email;
+
+    const uocr = await shopify.updateOneCustomer({
+      id: context.customer.id,
+      email: params.email,
+    });
+
+    if (uocr.errors.length > 0) {
+      return res.status(500).json(uocr);
     }
 
     await _createOrUpdateRegisteredDateToMetafields(req, res, next);

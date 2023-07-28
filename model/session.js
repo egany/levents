@@ -7,6 +7,7 @@ const sessionSchema = new mongoose.Schema({
   phone: { type: String },
   email: { type: String },
   otpVerified: { type: Boolean, default: false },
+  step: { type: Number, default: 0 },
 });
 
 const Session = mongoose.model("Session", sessionSchema);
