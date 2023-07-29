@@ -1,49 +1,64 @@
 const express = require("express");
 const router = express.Router();
-const { createError, ERR_NOT_FOUND } = require("../core").errors;
-const _provinces = require("../lib/provinces.json");
+const { Location } = require("../model/location");
 
 router.get("/provinces", async (req, res) => {
   const params = req.query;
   params.onlyName = params.onlyName === "true" ? true : false;
+  params.onlyProvince = params.onlyProvince === "true" ? true : false;
+  params.onlyDistrict = params.onlyDistrict === "true" ? true : false;
 
-  if (params.name) {
-    const province = _provinces.find((p) => p.name === params.name);
-
-    if (!province) {
-      res.status(404).json({
-        data: null,
-        errors: [
-          createError({
-            code: 404,
-            type: ERR_NOT_FOUND,
-            message: "Not found",
-            viMessage: "Không tìm thấy thông tin",
-          }),
-        ],
-      });
-      return;
-    }
-
-    res.json({
-      data: province,
-      errors: [],
-    });
-    return;
-  }
+  let result = {
+    data: {},
+    errors: [],
+  };
 
   if (params.onlyName === true) {
-    res.json({
-      data: _provinces.map((p) => p.name),
-      errors: [],
-    });
-    return;
+    result.data = (
+      await Location.find({}).select({ name: 1, _id: 0 }).lean()
+    ).map((l) => l.name);
+    return res.json(result);
   }
 
-  res.json({
-    data: _provinces,
-    errors: [],
-  });
+  if (params.onlyProvince === true) {
+    result.data = await Location.find()
+      .select({ name: 1, code: 1, _id: 0 })
+      .lean();
+    return res.json(result);
+  }
+
+  let filter = {};
+
+  if (params.code) {
+    params.code = Number.parseInt(params.code);
+    filter.code = params.code;
+  } else if (params.name) {
+    filter.name = params.name;
+  }
+
+  const province = await Location.findOne(filter, { _id: 0 }).lean();
+
+  if (params.districtCode) {
+    params.districtCode = Number.parseInt(params.districtCode);
+    province.districts = province.districts.filter(
+      (d) => d.code === params.districtCode
+    );
+  } else if (params.districtName) {
+    province.districts = province.districts.filter(
+      (d) => d.name === params.name
+    );
+  }
+
+  if (params.onlyDistrict) {
+    province.districts = province.districts.map((d) => {
+      let _d = { ...d };
+      delete _d.wards;
+      return _d;
+    });
+  }
+
+  result.data = province;
+  res.json(result);
 });
 
 module.exports = router;

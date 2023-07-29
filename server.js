@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 require("dotenv").config();
-require("./core/load-app-settings")
+require("./core/load-app-settings");
 const mongoose = require("mongoose");
 const debug = require("debug")("levents:server");
 const http = require("http");
@@ -32,8 +32,16 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => {
+  .then(async () => {
     console.log("Connected to MongoDB");
+    const { Location } = require("./model/location");
+    const count = await Location.count();
+
+    if (count === 0) {
+      await Location.insertMany(require("./lib/provinces.json"));
+    }
+  })
+  .then(() => {
     server.listen(helper.normalizePort(process.env.PORT || "3000"));
   })
   .catch((err) => console.log(err));
