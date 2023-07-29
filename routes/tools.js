@@ -70,7 +70,7 @@ async function test_tc_10(req, res, next) {
     const test = {
       name: "Test case 10",
       description: "Lỗi thiếu cả 2 thông tin trên",
-      flows: ["Nhập thông tin", "Yêu cầu đăng ký", "Thông báo bị khóa"],
+      flows: ["Nhập thông tin", "Yêu cầu đăng ký", "Thông báo lỗi"],
       tasks: [],
     };
 
@@ -128,7 +128,7 @@ async function test_tc_9(req, res, next) {
     const test = {
       name: "Test case 9",
       description: "Lỗi thiếu thông tin email",
-      flows: ["Nhập thông tin", "Yêu cầu đăng ký", "Thông báo bị khóa"],
+      flows: ["Nhập thông tin", "Yêu cầu đăng ký", "Thông báo lỗi"],
       tasks: [],
     };
 
@@ -187,7 +187,7 @@ async function test_tc_8(req, res, next) {
     const test = {
       name: "Test case 8",
       description: "Lỗi thiếu thông tin số điện thoại",
-      flows: ["Nhập thông tin", "Yêu cầu đăng ký", "Thông báo bị khóa"],
+      flows: ["Nhập thông tin", "Yêu cầu đăng ký", "Thông báo lỗi"],
       tasks: [],
     };
 
