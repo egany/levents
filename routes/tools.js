@@ -810,7 +810,46 @@ async function test_tc_4_2_3(req, res, next) {
 
     let rocr = await shopify.readOneCustomer({
       query: {
+        phone: accounts.account1.phone,
+        email: accounts.account1.email,
+      },
+    });
+
+    if (rocr.errors.length > 0) {
+      return res.status(500).json(rocr);
+    }
+
+    if (!rocr.data) {
+      await shopify.createOneCustomer({
+        ...accounts.account1,
+      });
+      rocr = null;
+      await helper.waitWithPromise(2000);
+    }
+
+    rocr = await shopify.readOneCustomer({
+      query: {
         phone: payload.phone,
+      },
+    });
+
+    if (rocr.errors.length > 0) {
+      return res.status(500).json(rocr);
+    }
+
+    if (rocr.data) {
+      const docr = await shopify.deleteOneCustomer({ id: rocr.data.id });
+
+      if (docr.errors.length > 0) {
+        return res.status(500).json(docr);
+      }
+      rocr = null;
+      await helper.waitWithPromise(2000);
+    }
+
+    rocr = await shopify.readOneCustomer({
+      query: {
+        email: payload.email,
       },
     });
 
@@ -838,26 +877,6 @@ async function test_tc_4_2_3(req, res, next) {
     }
 
     await helper.waitWithPromise(2000);
-
-    rocr = await shopify.readOneCustomer({
-      query: {
-        email: payload.email,
-      },
-    });
-
-    if (rocr.errors.length > 0) {
-      return res.status(500).json(rocr);
-    }
-
-    if (rocr.data) {
-      const docr = await shopify.deleteOneCustomer({ id: rocr.data.id });
-
-      if (docr.errors.length > 0) {
-        return res.status(500).json(docr);
-      }
-
-      await helper.waitWithPromise(2000);
-    }
 
     if (params.run !== "true") {
       return res.json({
@@ -902,7 +921,7 @@ async function test_tc_4_2_3(req, res, next) {
       name: "Submit lần 4 - Yêu cầu đăng ký tài khoản với email mới đã tồn tại",
       payload: {
         ...task3.response.data,
-        email: accounts.account5.email,
+        email: accounts.account1.email,
       },
       response: {},
     };
@@ -1247,7 +1266,7 @@ async function test_tc_4_1(req, res, next) {
 
     rocr = await shopify.readOneCustomer({
       query: {
-        email: payload.email,
+        email: accounts.account4.email,
       },
     });
 
@@ -1265,12 +1284,30 @@ async function test_tc_4_1(req, res, next) {
       await helper.waitWithPromise(2000);
     }
 
-    if (!rocr.data) {
-      rocr = await shopify.createOneCustomer({
-        ...accounts.account4,
-        email: null,
-      });
+    rocr = await shopify.readOneCustomer({
+      query: {
+        phone: accounts.account4.phone,
+      },
+    });
+
+    if (rocr.errors.length > 0) {
+      return res.status(500).json(rocr);
     }
+
+    if (rocr.data) {
+      const docr = await shopify.deleteOneCustomer({ id: rocr.data.id });
+
+      if (docr.errors.length > 0) {
+        return res.status(500).json(docr);
+      }
+
+      await helper.waitWithPromise(2000);
+    }
+
+    rocr = await shopify.createOneCustomer({
+      ...accounts.account4,
+      email: null,
+    });
 
     if (rocr.errors.length > 0) {
       return res.status(500).json(rocr);

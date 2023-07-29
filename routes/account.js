@@ -319,19 +319,23 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
     if (otherCustomer) {
       context.result.errors.push(
         createError({
-          code: 403,
+          code: 409,
           fields: ["email"],
           type: ERR_CONFLICT,
-          message: "Email alredy exists",
+          message: "Email already exists",
           viMessage: "Email đã tồn tại",
         })
       );
+      context.result.data.needOTPVerification = true;
+      context.result.data.sessionId = req.session.sessionId;
+      context.result.data.email = null;
       context.result.meta.responseCode =
         responseCodes.conflictEmailWithPhoneExists;
+
       return res.status(409).json(context.result);
     }
 
-    if (!params.needOTPVerification && !req.session.otpVerified) {
+    if (!params.needOTPVerification) {
       context.result.errors.push(
         createError({
           code: 409,
@@ -342,7 +346,18 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
         })
       );
       context.result.data.needOTPVerification = true;
+      context.result.data.sessionId = req.session.sessionId;
       context.result.meta.responseCode = responseCodes.conflictPhone;
+
+      await Session.findOneAndUpdate(
+        {
+          sessionId: req.session.sessionId,
+        },
+        {
+          step: 1,
+        }
+      );
+
       return res.status(409).json(context.result);
     }
 
@@ -350,7 +365,7 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
       params.needOTPVerification &&
       (!req.session.phoneVerified ||
         (params.phone &&
-          req.session?.phone &&
+          req.session.phone &&
           !helper.comparePhoneNumber(params.phone, req.session.phone)))
     ) {
       const beginOTPResult = await beginOTP({
@@ -365,53 +380,76 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
       }
 
       context.result = beginOTPResult;
+      context.result.data.sessionId = req.session.sessionId;
+      context.result.data.needOTPVerification = true;
+
+      await Session.findOneAndUpdate(
+        {
+          sessionId: req.session.sessionId,
+        },
+        {
+          step: 2,
+        }
+      );
+
       return res.json(context.result);
     }
 
-    if (req.session.phoneVerified && !req.session.otpVerified) {
-      context.result.data = helper.makeCustomerResponseData(
-        {
-          ...context.customer,
-        },
-        params
-      );
+    if (
+      params.needOTPVerification &&
+      req.session.phoneVerified &&
+      req.session.step === 2
+    ) {
+      context.result.data = {
+        ...context.customer,
+        needOTPVerification: true,
+        sessionId: req.session.sessionId,
+      };
 
-      context.result.data.sessionId = req.session.sessionId;
       await Session.findOneAndUpdate(
         { sessionId: req.session.sessionId },
-        { otpVerified: true }
+        { step: 3 }
       );
+
       return res.json(context.result);
     }
 
-    rocr = await shopify.readOneCustomer({
-      query: {
-        email: params.email,
-      },
-    });
+    if (
+      params.needOTPVerification &&
+      req.session.phoneVerified &&
+      req.session.step === 3
+    ) {
+      rocr = await shopify.readOneCustomer({
+        query: {
+          email: params.email,
+        },
+      });
 
-    if (rocr.errors.length > 0) {
-      return res.json(500).json(rocr);
+      if (rocr.errors.length > 0) {
+        return res.json(500).json(rocr);
+      }
+
+      if (rocr.data) {
+        context.result.errors.push(
+          createError({
+            code: 409,
+            fields: ["email"],
+            type: ERR_CONFLICT,
+            message: "Email already exists",
+            viMessage: "Email đã tồn tại",
+          })
+        );
+        context.result.data.needOTPVerification = true;
+        context.result.data.sessionId = req.session.sessionId;
+        context.result.data.email = null;
+        context.result.meta.responseCode =
+          responseCodes.conflictEmailWithPhoneExists;
+
+        return res.status(409).json(context.result);
+      } else {
+        context.customer.email = params.email;
+      }
     }
-
-    if (rocr.data) {
-      context.result.errors.push(
-        createError({
-          code: 409,
-          fields: ["phone"],
-          type: ERR_CONFLICT,
-          message: "Email already exists",
-          viMessage: "Email đã tồn tại",
-        })
-      );
-      context.result.data.needOTPVerification = true;
-      context.result.data.sessionId = req.session.sessionId;
-      context.result.meta.responseCode =
-        responseCodes.conflictEmailWithPhoneExists;
-      return res.status(409).json(context.result);
-    }
-
-    context.customer.email = params.email;
 
     const uocr = await shopify.updateOneCustomer({
       id: context.customer.id,
@@ -441,6 +479,8 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
     );
 
     context.result.data.sessionId = req.session.sessionId;
+    context.result.data.needOTPVerification = true;
+
     return res.json(context.result);
   } catch (error) {
     return next(error);
@@ -560,7 +600,7 @@ async function _handleNotClassicAccountExistsWithNotSameEmailAndPhone(
       return next();
     }
 
-    if (!params.needOTPVerification && !req.session.otpVerified) {
+    if (!params.needOTPVerification) {
       context.result.errors.push(
         createError({
           code: 409,
@@ -571,15 +611,22 @@ async function _handleNotClassicAccountExistsWithNotSameEmailAndPhone(
         })
       );
       context.result.data.needOTPVerification = true;
+      context.result.data.sessionId = req.session.sessionId;
       context.result.meta.responseCode = responseCodes.conflictPhone;
+
+      await Session.findOneAndUpdate(
+        {
+          sessionId: req.session.sessionId,
+        },
+        {
+          step: 1,
+        }
+      );
+
       return res.status(409).json(context.result);
     }
 
-    if (
-      params.needOTPVerification &&
-      !context.otpVerified &&
-      !req.session.otpVerified
-    ) {
+    if (params.needOTPVerification && !req.session.phoneVerified) {
       const beginOTPResult = await beginOTP({
         params,
         res,
@@ -592,13 +639,40 @@ async function _handleNotClassicAccountExistsWithNotSameEmailAndPhone(
       }
 
       context.result = beginOTPResult;
+      context.result.data.sessionId = req.session.sessionId;
+      context.result.data.needOTPVerification = true;
+
+      await Session.findOneAndUpdate(
+        {
+          sessionId: req.session.sessionId,
+        },
+        {
+          step: 2,
+        }
+      );
+
       return res.json(context.result);
     }
 
-    await Session.findOneAndUpdate(
-      { sessionId: req.session.sessionId },
-      { otpVerified: true }
-    );
+    if (
+      params.needOTPVerification &&
+      req.session.phoneVerified &&
+      req.session.step === 2
+    ) {
+      context.result.data = {
+        ...context.customer,
+        needOTPVerification: true,
+        sessionId: req.session.sessionId,
+      };
+
+      await Session.findOneAndUpdate(
+        { sessionId: req.session.sessionId },
+        { step: 3 }
+      );
+
+      return res.json(context.result);
+    }
+
     await _createOrUpdateRegisteredDateToMetafields(req, res, next);
 
     const gsaaur = await shopify.generateAccountActivationUrl({
@@ -616,8 +690,9 @@ async function _handleNotClassicAccountExistsWithNotSameEmailAndPhone(
       },
       params
     );
-
     context.result.data.sessionId = req.session.sessionId;
+    context.result.data.needOTPVerification = true;
+
     return res.json(context.result);
   } catch (error) {
     return next(error);
@@ -728,23 +803,7 @@ async function _handleNotClassicAccountExistsWithSameEmailAndPhone(
       return next();
     }
 
-    // const rocr = await shopify.readOneCustomer({
-    //   query: {
-    //     email: params.email,
-    //     phone: params.phone,
-    //     id: context.customer.id,
-    //   },
-    //   not: ["id"],
-    // });
-
-    // if (rocr.errors.length > 0) {
-    //   return res.status(500).json(rocr);
-    // }
-
-    // const otherCustomer = rocr.data ? { ...rocr.data } : null;
-
-    // if (!otherCustomer) {
-    if (!params.needOTPVerification && !req.session.otpVerified) {
+    if (!params.needOTPVerification) {
       context.result.errors.push(
         createError({
           code: 409,
@@ -755,15 +814,16 @@ async function _handleNotClassicAccountExistsWithSameEmailAndPhone(
         })
       );
       context.result.data.needOTPVerification = true;
+      context.result.data.sessionId = req.session.sessionId;
       context.result.meta.responseCode = responseCodes.conflictEmailPhone;
+      await Session.findOneAndUpdate(
+        { sessionId: req.session.sessionId },
+        { step: 1 }
+      );
       return res.status(409).json(context.result);
     }
 
-    if (
-      params.needOTPVerification &&
-      !context.otpVerified &&
-      !req.session.otpVerified
-    ) {
+    if (params.needOTPVerification && !req.session.phoneVerified) {
       const beginOTPResult = await beginOTP({
         params,
         res,
@@ -776,13 +836,36 @@ async function _handleNotClassicAccountExistsWithSameEmailAndPhone(
       }
 
       context.result = beginOTPResult;
+      context.result.data.needOTPVerification = true;
+      context.result.data.sessionId = req.session.sessionId;
+
+      await Session.findOneAndUpdate(
+        { sessionId: req.session.sessionId },
+        { step: 2 }
+      );
+
       return res.json(context.result);
     }
 
-    await Session.findOneAndUpdate(
-      { sessionId: req.session.sessionId },
-      { otpVerified: true }
-    );
+    if (
+      params.needOTPVerification &&
+      req.session.phoneVerified &&
+      req.session.step === 2
+    ) {
+      context.result.data = {
+        ...context.customer,
+        needOTPVerification: true,
+        sessionId: req.session.sessionId,
+      };
+
+      await Session.findOneAndUpdate(
+        { sessionId: req.session.sessionId },
+        { step: 3 }
+      );
+
+      return res.json(context.result);
+    }
+
     await _createOrUpdateRegisteredDateToMetafields(req, res, next);
 
     const gsaaur = await shopify.generateAccountActivationUrl({
@@ -802,23 +885,9 @@ async function _handleNotClassicAccountExistsWithSameEmailAndPhone(
     );
 
     context.result.data.sessionId = req.session.sessionId;
+    context.result.data.needOTPVerification = true;
 
     return res.json(context.result);
-    // }
-
-    // if (
-    //   otherCustomer.email === context.customer.email &&
-    //   !otherCustomer.phone
-    // ) {
-
-    // }
-
-    // if (
-    //   otherCustomer.phone &&
-    //   helper.comparePhoneNumber(otherCustomer.phone, context.customer.phone) &&
-    //   !otherCustomer.email
-    // ) {
-    // }
   } catch (error) {
     return next(error);
   }
@@ -870,45 +939,6 @@ async function _handleClassicAccountExistsWithSameEmailAndPhone(
     context.result.meta.responseCode =
       responseCodes.hasAClassicAccountWithEmail;
     return res.status(409).json(context.result);
-
-    // if (!params.needOTPVerification) {
-    //   context.result.errors.push(
-    //     createError({
-    //       code: 409,
-    //       fields: ["email", "phone"],
-    //       type: ERR_CONFLICT,
-    //       message: "Email and phone number already exists",
-    //       viMessage: "Email và số điện thoại đã tồn tại",
-    //     })
-    //   );
-    //   context.result.meta.responseCode = responseCodes.conflictEmailPhone;
-    //   return res.status(409).json(context.result);
-    // }
-
-    // if (params.needOTPVerification && !context.otpVerified) {
-    //   const beginOTPResult = await beginOTP({
-    //     params,
-    //     res,
-    //     result: context.result,
-    //     phone: customer.phone,
-    //   });
-
-    //   // END
-    //   if (!beginOTPResult) {
-    //     return;
-    //   }
-
-    //   context.result = beginOTPResult;
-    //   return res.json(context.result);
-    // }
-
-    // let fullName = helper.makeFullName(
-    //   context.customer.firstName,
-    //   context.customer.lastName
-    // );
-    // fullName = fullName !== "" ? fullName : params.fullName;
-    // context.result.data = context.customer;
-    // return res.json(context.result);
   } catch (error) {
     return next(error);
   }
@@ -961,6 +991,8 @@ async function _handleAccountNotExists(req, res, next) {
 
     if (!params.needOTPVerification) {
       context.result.data.needOTPVerification = true;
+      context.result.data.sessionId = req.session.sessionId;
+      context.result.meta.responseCode = responseCodes.success;
       return res.status(409).json(context.result);
     }
 
@@ -978,6 +1010,9 @@ async function _handleAccountNotExists(req, res, next) {
       }
 
       context.result = beginOTPResult;
+      context.result.data.needOTPVerification = true;
+      context.result.data.sessionId = req.session.sessionId;
+
       return res.json(context.result);
     }
 
@@ -1034,6 +1069,8 @@ async function _handleAccountNotExists(req, res, next) {
       },
       params
     );
+    context.result.data.needOTPVerification = true;
+    context.result.data.sessionId = req.session.sessionId;
 
     return res.json(context.result);
   } catch (error) {
@@ -1125,15 +1162,17 @@ async function _verifyOTP(req, res, next) {
 
     if (params.otpPhone) {
       req.session.phoneVerified = true;
+      req.session.phone = parsePhoneNumber(params.phone, "VN").number;
       await Session.findOneAndUpdate(
         { sessionId: req.session.sessionId },
         {
           phoneVerified: true,
-          phone: context.standardizedPhoneNumber,
+          phone: req.session.phone,
         }
       );
     } else if (params.otpEmail) {
       req.session.emailVerified = true;
+      req.session.email = params.email;
       await Session.findOneAndUpdate(
         { sessionId: req.session.sessionId },
         {
@@ -1175,7 +1214,9 @@ async function _createOrUpdateSession(req, res, next) {
   if (params.sessionId) {
     session = await Session.findOne({ sessionId: params.sessionId }).lean();
   } else {
-    session = await Session.create({ sessionId: helper.generateSessionId() });
+    session = (
+      await Session.create({ sessionId: helper.generateSessionId() })
+    ).toObject();
   }
 
   if (session) {
@@ -1183,7 +1224,7 @@ async function _createOrUpdateSession(req, res, next) {
   }
 
   req.context.result.meta.sessionId = session?.sessionId;
-  req.session = { ...session };
+  req.session = session;
 
   return next();
 }
