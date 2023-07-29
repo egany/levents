@@ -1659,7 +1659,7 @@ async function test_tc_2_1(req, res, next) {
         "Nhập thông tin",
         "Yêu cầu đăng ký",
         "Thông báo tài khoản đã tồn tại",
-        "Quên mật khẩu hoặc thay đổ thông tin",
+        "Quên mật khẩu hoặc thay đổi thông tin",
       ],
       tasks: [],
     };
