@@ -81,11 +81,11 @@ function makeFullName(firstName, lastName) {
 
   let fullName = "";
 
-  if (lastName !== "") {
+  if (typeof lastName === "string" && lastName !== "") {
     fullName += lastName;
   }
 
-  if (firstName !== "") {
+  if (typeof firstName === "string" && firstName !== "") {
     if (fullName !== "") {
       fullName += " ";
     }
@@ -111,7 +111,7 @@ function makeCustomerResponseData(customer, params) {
     tags: customer.tags,
     verifiedEmail: customer.verifiedEmail,
     metafields: customer.metafields,
-    name: fullName,
+    fullName,
     accountActivationUrl: customer.accountActivationUrl,
   };
 }
