@@ -50,8 +50,440 @@ router.get(
   test_tc_4_2_2,
   test_tc_4_2_3,
   test_tc_5_1,
-  test_tc_5_2
+  test_tc_5_2,
+  test_tc_6,
+  test_tc_7,
+  test_tc_8,
+  test_tc_9,
+  test_tc_10
 );
+
+async function test_tc_10(req, res, next) {
+  try {
+    const accounts = req.accounts;
+    const params = req.query;
+
+    if (params.tc !== "10") {
+      return next();
+    }
+
+    const test = {
+      name: "Test case 10",
+      description: "Lỗi thiếu cả 2 thông tin trên",
+      flows: ["Nhập thông tin", "Yêu cầu đăng ký", "Thông báo bị khóa"],
+      tasks: [],
+    };
+
+    let payload = {
+      fullName: accounts.account12.fullName,
+      birthday: accounts.account12.birthday,
+      gender: accounts.account12.gender,
+    };
+
+    const rocr = await shopify.readOneCustomer({
+      query: {
+        phone: payload.phone,
+      },
+    });
+
+    if (rocr.errors.length > 0) {
+      return res.status(500).json(rocr);
+    }
+
+    if (rocr.data) {
+      const docr = await shopify.deleteOneCustomer({ id: rocr.data.id });
+
+      if (docr.errors.length > 0) {
+        return res.status(500).json(docr);
+      }
+    }
+
+    if (params.run !== "true") {
+      return res.json({ message: "OK" });
+    }
+
+    let task1 = {
+      name: "Submit lần 1 - Yêu cầu đăng ký",
+      payload,
+      response: {},
+    };
+    task1.response = await callRegisterAccount(task1.payload);
+    test.tasks.push(task1);
+
+    return res.json(test);
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
+}
+
+async function test_tc_9(req, res, next) {
+  try {
+    const accounts = req.accounts;
+    const params = req.query;
+
+    if (params.tc !== "9") {
+      return next();
+    }
+
+    const test = {
+      name: "Test case 9",
+      description: "Lỗi thiếu thông tin email",
+      flows: ["Nhập thông tin", "Yêu cầu đăng ký", "Thông báo bị khóa"],
+      tasks: [],
+    };
+
+    let payload = {
+      phone: accounts.account11.phone,
+      fullName: accounts.account11.fullName,
+      birthday: accounts.account11.birthday,
+      gender: accounts.account11.gender,
+    };
+
+    const rocr = await shopify.readOneCustomer({
+      query: {
+        phone: payload.phone,
+      },
+    });
+
+    if (rocr.errors.length > 0) {
+      return res.status(500).json(rocr);
+    }
+
+    if (rocr.data) {
+      const docr = await shopify.deleteOneCustomer({ id: rocr.data.id });
+
+      if (docr.errors.length > 0) {
+        return res.status(500).json(docr);
+      }
+    }
+
+    if (params.run !== "true") {
+      return res.json({ message: "OK" });
+    }
+
+    let task1 = {
+      name: "Submit lần 1 - Yêu cầu đăng ký",
+      payload,
+      response: {},
+    };
+    task1.response = await callRegisterAccount(task1.payload);
+    test.tasks.push(task1);
+
+    return res.json(test);
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
+}
+
+async function test_tc_8(req, res, next) {
+  try {
+    const accounts = req.accounts;
+    const params = req.query;
+
+    if (params.tc !== "8") {
+      return next();
+    }
+
+    const test = {
+      name: "Test case 8",
+      description: "Lỗi thiếu thông tin số điện thoại",
+      flows: ["Nhập thông tin", "Yêu cầu đăng ký", "Thông báo bị khóa"],
+      tasks: [],
+    };
+
+    let payload = {
+      email: accounts.account10.email,
+      fullName: accounts.account10.fullName,
+      birthday: accounts.account10.birthday,
+      gender: accounts.account10.gender,
+    };
+
+    const rocr = await shopify.readOneCustomer({
+      query: {
+        phone: payload.phone,
+      },
+    });
+
+    if (rocr.errors.length > 0) {
+      return res.status(500).json(rocr);
+    }
+
+    if (rocr.data) {
+      const docr = await shopify.deleteOneCustomer({ id: rocr.data.id });
+
+      if (docr.errors.length > 0) {
+        return res.status(500).json(docr);
+      }
+    }
+
+    if (params.run !== "true") {
+      return res.json({ message: "OK" });
+    }
+
+    let task1 = {
+      name: "Submit lần 1 - Yêu cầu đăng ký",
+      payload,
+      response: {},
+    };
+    task1.response = await callRegisterAccount(task1.payload);
+    test.tasks.push(task1);
+
+    return res.json(test);
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
+}
+
+async function test_tc_7(req, res, next) {
+  try {
+    const accounts = req.accounts;
+    const params = req.query;
+
+    if (params.tc !== "7") {
+      return next();
+    }
+
+    const test = {
+      name: "Test case 7",
+      description: "Gửi lại mã OTP quá 3 lần",
+      flows: [
+        "Nhập thông tin",
+        "Yêu cầu đăng ký",
+        "Yêu cầu gửi OTP SMS lần 1",
+        "Yêu cầu gửi OTP SMS lần 2",
+        "Yêu cầu gửi OTP SMS lần 3",
+        "Yêu cầu gửi OTP SMS lần 4",
+        "Thông báo bị khóa",
+      ],
+      tasks: [],
+    };
+
+    let payload = {
+      phone: accounts.account9.phone,
+      email: accounts.account9.email,
+      fullName: accounts.account9.fullName,
+      birthday: accounts.account9.birthday,
+      gender: accounts.account9.gender,
+    };
+
+    const rocr = await shopify.readOneCustomer({
+      query: {
+        phone: payload.phone,
+      },
+    });
+
+    if (rocr.errors.length > 0) {
+      return res.status(500).json(rocr);
+    }
+
+    if (rocr.data) {
+      const docr = await shopify.deleteOneCustomer({ id: rocr.data.id });
+
+      if (docr.errors.length > 0) {
+        return res.status(500).json(docr);
+      }
+    }
+
+    if (params.run !== "true") {
+      return res.json({ message: "OK" });
+    }
+
+    let task1 = {
+      name: "Submit lần 1 - Yêu cầu đăng ký",
+      payload,
+      response: {},
+    };
+    task1.response = await callRegisterAccount(task1.payload);
+    test.tasks.push(task1);
+
+    let task2 = {
+      name: "Submit lần 2 - Yêu cầu gửi OTP qua số điện thoại - Lần 1",
+      payload: task1.response.data,
+      response: {},
+    };
+    task2.response = await callRegisterAccount(task2.payload);
+    test.tasks.push(task2);
+
+    let task3 = {
+      name: "Submit lần 3 - Yêu cầu gửi OTP qua số điện thoại - Lần 2",
+      payload: task1.response.data,
+      response: {},
+    };
+    task3.response = await callRegisterAccount(task3.payload);
+    test.tasks.push(task3);
+
+    let task4 = {
+      name: "Submit lần 4 - Yêu cầu gửi OTP qua số điện thoại - Lần 3",
+      payload: task1.response.data,
+      response: {},
+    };
+    task4.response = await callRegisterAccount(task4.payload);
+    test.tasks.push(task4);
+
+    let task5 = {
+      name: "Submit lần 5 - Yêu cầu gửi OTP qua số điện thoại - Lần 4",
+      payload: task1.response.data,
+      response: {},
+    };
+    task5.response = await callRegisterAccount(task5.payload);
+    test.tasks.push(task5);
+
+    return res.json(test);
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
+}
+
+async function test_tc_6(req, res, next) {
+  try {
+    const accounts = req.accounts;
+    const params = req.query;
+
+    if (params.tc !== "6") {
+      return next();
+    }
+
+    const test = {
+      name: "Test case 6",
+      description: "Xác thực mã OTP sai quá 5 lần",
+      flows: [
+        "Nhập thông tin",
+        "Yêu cầu đăng ký",
+        "Yêu cầu gửi OTP SMS",
+        "Xác thực OTP sai lần 1",
+        "Xác thực OTP sai lần 2",
+        "Xác thực OTP sai lần 3",
+        "Xác thực OTP sai lần 4",
+        "Xác thực OTP sai lần 5",
+        "Xác thực OTP sai lần 6",
+        "Thông báo bị khóa",
+      ],
+      tasks: [],
+    };
+
+    let payload = {
+      phone: accounts.account8.phone,
+      email: accounts.account8.email,
+      fullName: accounts.account8.fullName,
+      birthday: accounts.account8.birthday,
+      gender: accounts.account8.gender,
+    };
+
+    const rocr = await shopify.readOneCustomer({
+      query: {
+        phone: payload.phone,
+      },
+    });
+
+    if (rocr.errors.length > 0) {
+      return res.status(500).json(rocr);
+    }
+
+    if (rocr.data) {
+      const docr = await shopify.deleteOneCustomer({ id: rocr.data.id });
+
+      if (docr.errors.length > 0) {
+        return res.status(500).json(docr);
+      }
+    }
+
+    if (params.run !== "true") {
+      return res.json({ message: "OK" });
+    }
+
+    let task1 = {
+      name: "Submit lần 1 - Yêu cầu đăng ký",
+      payload,
+      response: {},
+    };
+    task1.response = await callRegisterAccount(task1.payload);
+    test.tasks.push(task1);
+
+    let task2 = {
+      name: "Submit lần 2 - Yêu cầu gửi OTP qua số điện thoại",
+      payload: task1.response.data,
+      response: {},
+    };
+    task2.response = await callRegisterAccount(task2.payload);
+    test.tasks.push(task2);
+
+    let task3 = {
+      name: "Submit lần 3 - Yêu cầu xác thực OTP từ số điện thoại - Sài lần 1",
+      payload: {
+        ...task2.response.data,
+        otpPhone: task2.response.data.otpPhone,
+        otp: "000001",
+      },
+      response: {},
+    };
+    task3.response = await callRegisterAccount(task3.payload);
+    test.tasks.push(task3);
+
+    let task4 = {
+      name: "Submit lần 4 - Yêu cầu xác thực OTP từ số điện thoại - Sài lần 2",
+      payload: {
+        ...task3.response.data,
+        otpPhone: task3.response.data.otpPhone,
+        otp: "000002",
+      },
+      response: {},
+    };
+    task4.response = await callRegisterAccount(task4.payload);
+    test.tasks.push(task4);
+
+    let task5 = {
+      name: "Submit lần 5 - Yêu cầu xác thực OTP từ số điện thoại - Sài lần 3",
+      payload: {
+        ...task4.response.data,
+        otpPhone: task4.response.data.otpPhone,
+        otp: "000003",
+      },
+      response: {},
+    };
+    task5.response = await callRegisterAccount(task5.payload);
+    test.tasks.push(task5);
+
+    let task6 = {
+      name: "Submit lần 6 - Yêu cầu xác thực OTP từ số điện thoại - Sài lần 4",
+      payload: {
+        ...task5.response.data,
+        otpPhone: task5.response.data.otpPhone,
+        otp: "000004",
+      },
+      response: {},
+    };
+    task6.response = await callRegisterAccount(task6.payload);
+    test.tasks.push(task6);
+
+    let task7 = {
+      name: "Submit lần 7 - Yêu cầu xác thực OTP từ số điện thoại - Sài lần 5",
+      payload: {
+        ...task6.response.data,
+        otpPhone: task6.response.data.otpPhone,
+        otp: "000004",
+      },
+      response: {},
+    };
+    task7.response = await callRegisterAccount(task7.payload);
+    test.tasks.push(task7);
+
+    let task8 = {
+      name: "Submit lần 8 - Yêu cầu xác thực OTP từ số điện thoại - Sài lần 6",
+      payload: {
+        ...task6.response.data,
+        otpPhone: task6.response.data.otpPhone,
+        otp: "000005",
+      },
+      response: {},
+    };
+    task8.response = await callRegisterAccount(task8.payload);
+    test.tasks.push(task8);
+
+    return res.json(test);
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
+}
 
 async function test_tc_5_2(req, res, next) {
   try {
@@ -1366,7 +1798,7 @@ async function test_tc_1(req, res, next) {
 async function init(req, res, next) {
   const accounts = {};
 
-  for (let i = 0; i <= 10; i++) {
+  for (let i = 0; i <= 15; i++) {
     const id = i + 1;
     accounts[`account${id}`] = {
       phone: `03830000${id < 10 ? "0" + id : id}`,
