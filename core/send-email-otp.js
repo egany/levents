@@ -1,3 +1,5 @@
+const sgMail = require("@sendgrid/mail");
+
 /**
  *
  * @param {Levents.SendEmailOTPParams} params
