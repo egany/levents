@@ -146,6 +146,7 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
         needOTPVerification: true,
         sessionId: req.session.sessionId,
       };
+
       return res.json(context.result);
     }
 
@@ -259,6 +260,8 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       },
       params
     );
+    context.result.data.sessionId = req.session.sessionId;
+    context.result.data.needOTPVerification = true;
 
     return res.json(context.result);
   } catch (error) {

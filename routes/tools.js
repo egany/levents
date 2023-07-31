@@ -650,7 +650,7 @@ async function test_tc_5_2(req, res, next) {
     await helper.waitWithPromise(2000);
 
     let task7 = {
-      name: "Submit lần 7 - Nhập số điện thoại chưa tồn tại và yêu gửi OTP qua SMS",
+      name: "Submit lần 7 - Nhập số điện thoại chưa tồn tại kiểm tra thông tin",
       payload: { ...task6.response.data, phone: accounts.account7.phone },
       response: {},
     };
@@ -659,12 +659,8 @@ async function test_tc_5_2(req, res, next) {
     await helper.waitWithPromise(2000);
 
     let task8 = {
-      name: "Submit lần 8 - Yêu cầu xác thực OTP từ SMS",
-      payload: {
-        ...task7.response.data,
-        otpPhone: task7.response.data.otpPhone,
-        otp: task7.response.data.otp,
-      },
+      name: "Submit lần 8 - Yêu gửi OTP qua SMS",
+      payload: task7.response.data,
       response: {},
     };
     task8.response = await callRegisterAccount(task8.payload);
@@ -672,12 +668,21 @@ async function test_tc_5_2(req, res, next) {
     await helper.waitWithPromise(2000);
 
     let task9 = {
-      name: "Submit lần 9 - Yêu đăng ký",
+      name: "Submit lần 9 - Yêu cần xác thực OTP nhận được từ SMS",
       payload: task8.response.data,
       response: {},
     };
     task9.response = await callRegisterAccount(task9.payload);
     test.tasks.push(task9);
+    await helper.waitWithPromise(2000);
+
+    let task10 = {
+      name: "Submit lần 10 - Yêu cầu đăng ký",
+      payload: task9.response.data,
+      response: {},
+    };
+    task10.response = await callRegisterAccount(task10.payload);
+    test.tasks.push(task10);
     await helper.waitWithPromise(2000);
 
     return res.json(test);
