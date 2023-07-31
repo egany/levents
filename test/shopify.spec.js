@@ -42,7 +42,7 @@
 //   });
 
 //   test("Delete one customer", async () => {
-//     const resutl = await shopify.deleteOnCustomer({
+//     const resutl = await shopify.deleteOneCustomer({
 //       id: shopifyCustomer.id,
 //     });
 //     expect(resutl.data).not.toBeNull();
