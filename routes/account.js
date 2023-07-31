@@ -1273,6 +1273,18 @@ async function _validate(req, res, next) {
         })
       );
       context.result.meta.responseCode = responseCodes.missingEmail;
+    } else if (!/(@)(.+)$/g.test(params.email)) {
+      context.result.errors.push(
+        createError({
+          code: 400,
+          type: ERR_INVALID_ARGS,
+          fields: ["email"],
+          message: "Email invalid",
+          viMessage: "Email không hợp lệ",
+        })
+      );
+
+      context.result.meta.responseCode = responseCodes.invalidPhoneOrEmail;
     }
 
     if (!params.phone) {
@@ -1291,6 +1303,18 @@ async function _validate(req, res, next) {
       } else {
         context.result.meta.responseCode = responseCodes.missingEmailPhone;
       }
+    } else if (parsePhoneNumber(params.phone, "VN").number.length != 12) {
+      context.result.errors.push(
+        createError({
+          code: 400,
+          type: ERR_INVALID_ARGS,
+          fields: ["phone"],
+          message: "Phone invalid",
+          viMessage: "Số điện thoại không hợp lệ",
+        })
+      );
+
+      context.result.meta.responseCode = responseCodes.invalidPhoneOrEmail;
     }
 
     if (context.result.errors.length > 0) {
