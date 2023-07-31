@@ -1850,13 +1850,13 @@ async function init(req, res, next) {
       accounts[`account${id}`].metafields = [
         {
           key: "currentPoints",
-          namespace: "membership",
+          namespace: "levents",
           type: "number_integer",
           value: "100",
         },
         {
           key: "currentRewardPointsLVS",
-          namespace: "membership",
+          namespace: "levents",
           type: "number_integer",
           value: "200",
         },

@@ -14,6 +14,7 @@ const responseCodes = {
   emailVerifiedButNeedPhoneVerification: 14,
   hasAClassicAccountWithEmail: 15,
   conflictEmailWithPhoneExists: 16,
+  invalidPhoneOrEmail: 17,
 };
 
 module.exports = {
