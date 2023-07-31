@@ -58,19 +58,6 @@ async function verifyOTP(params) {
     };
   }
 
-  if (!user) {
-    result.errors.push(
-      createError({
-        type: ERR_FORBIDDEN,
-        code: 403,
-        message: "OTP verification failed",
-        viMessage: "Mã OTP không chính xác",
-      })
-    );
-    result.meta.responseCode = responseCodes.otpVerificationFailed;
-    return result;
-  }
-
   // Check if user account is blocked
   if (user.isBlocked) {
     const currentTime = new Date();
@@ -109,7 +96,7 @@ async function verifyOTP(params) {
       user.blockUntil = blockUntil;
     }
 
-    await user.save();
+    await User.findByIdAndUpdate(user._id, { ...user });
 
     result.errors.push(
       createError({
@@ -155,7 +142,7 @@ async function verifyOTP(params) {
   user.OTPAttempts = 0;
   user.OTPCreateAttempts = 0;
 
-  await user.save();
+  await User.findByIdAndUpdate(user._id, { ...user });
 
   result.data = { verified: true };
   result.meta.otpAttempts = user.OTPAttempts;
