@@ -122,30 +122,9 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
         {
           sessionId: req.session.sessionId,
         },
-        { step: 1 }
-      );
-
-      return res.json(context.result);
-    }
-
-    if (
-      params.needOTPVerification &&
-      req.session.emailVerified &&
-      !req.session.phoneVerified &&
-      req.session.step === 1
-    ) {
-      await Session.findOneAndUpdate(
-        {
-          sessionId: req.session.sessionId,
-        },
         { step: 2 }
       );
 
-      context.result.data = {
-        ...context.customer,
-        needOTPVerification: true,
-        sessionId: req.session.sessionId,
-      };
       return res.json(context.result);
     }
 
@@ -162,6 +141,43 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
         { step: 3 }
       );
 
+      context.result.data = {
+        ...context.customer,
+        needOTPVerification: true,
+        sessionId: req.session.sessionId,
+      };
+      return res.json(context.result);
+    }
+
+    if (
+      params.needOTPVerification &&
+      req.session.emailVerified &&
+      !req.session.phoneVerified &&
+      req.session.step === 3
+    ) {
+      await Session.findOneAndUpdate(
+        {
+          sessionId: req.session.sessionId,
+        },
+        { step: 4 }
+      );
+
+      context.result.data = {
+        ...context.customer,
+        needOTPVerification: true,
+        sessionId: req.session.sessionId,
+        phone: params.phone,
+      };
+
+      return res.json(context.result);
+    }
+
+    if (
+      params.needOTPVerification &&
+      req.session.emailVerified &&
+      !req.session.phoneVerified &&
+      req.session.step === 4
+    ) {
       const beginOTPResult = await beginOTP({
         params,
         res,
@@ -182,6 +198,13 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
         phone: params.phone,
       };
 
+      await Session.findOneAndUpdate(
+        {
+          sessionId: req.session.sessionId,
+        },
+        { step: 5 }
+      );
+
       return res.json(context.result);
     }
 
@@ -189,13 +212,13 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       params.needOTPVerification &&
       req.session.emailVerified &&
       req.session.phoneVerified &&
-      req.session.step === 3
+      req.session.step === 5
     ) {
       await Session.findOneAndUpdate(
         {
           sessionId: req.session.sessionId,
         },
-        { step: 4 }
+        { step: 6 }
       );
 
       context.result.data = {
