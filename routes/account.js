@@ -1439,8 +1439,10 @@ async function beginOTP(args) {
 
     if (process.appSettings.otpTestMode === 2) {
       result.data.otp = generateOTPResult.data.OTP;
-    } else if (process.appSettings.otpTestMode === 1) {
-      result.data.otp = generateOTPResult.data.OTP;
+    } else {
+      if (process.appSettings.otpTestMode === 1) {
+        result.data.otp = generateOTPResult.data.OTP;
+      }
 
       if (phone) {
         sendPhoneOTP({

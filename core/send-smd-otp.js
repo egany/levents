@@ -1,3 +1,4 @@
+const axios = require("axios").default;
 /**
  *
  * @param {Levents.SendPhoneOTPParams} params
@@ -25,7 +26,7 @@ async function sendPhoneOTP(params) {
     });
     return res.data;
   } catch (error) {
-    console.debug(error.response);
+    console.log(error);
   }
 }
 
