@@ -23,7 +23,7 @@ router.post(
   _verifyOTP,
   _readOneCustomer,
   _handleAccountNotExists,
-  _handleBlockAccount,
+  // _handleBlockAccount,
   _handleClassicAccountEmailExists,
   _handleClassicAccountExistsWithSameEmailAndPhone,
   _handleNotClassicAccountExistsWithSameEmailAndPhone,
@@ -47,7 +47,7 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
   const params = req.body;
   const context = req.context;
   try {
-    if (context.customer.state !== shopify.customerState.DISABLED) {
+    if (context.customer.state === shopify.customerState.ENABLED) {
       return next();
     }
 
@@ -316,7 +316,7 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
   const params = req.body;
   const context = req.context;
   try {
-    if (context.customer.state !== shopify.customerState.DISABLED) {
+    if (context.customer.state === shopify.customerState.ENABLED) {
       return next();
     }
 
@@ -586,7 +586,7 @@ async function _handleNotClassicAccountExistsWithNotSameEmailAndPhone(
   const params = req.body;
   const context = req.context;
   try {
-    if (context.customer.state !== shopify.customerState.DISABLED) {
+    if (context.customer.state === shopify.customerState.ENABLED) {
       return next();
     }
 
@@ -808,7 +808,7 @@ async function _handleNotClassicAccountExistsWithSameEmailAndPhone(
   const params = req.body;
   const context = req.context;
   try {
-    if (context.customer.state !== shopify.customerState.DISABLED) {
+    if (context.customer.state === shopify.customerState.ENABLED) {
       return next();
     }
 
@@ -969,37 +969,7 @@ async function _handleClassicAccountExistsWithSameEmailAndPhone(
     return next(error);
   }
 }
-/**
- *
- * @param {Levents.Routes.RegisterAccountRequest} req
- * @param {Levents.Routes.Response} res
- * @param {Levents.Routes.NextFunction} next
- */
-async function _handleBlockAccount(req, res, next) {
-  const context = req.context;
-  try {
-    if (
-      context.customer.state !== shopify.customerState.DISABLED &&
-      context.customer.state !== shopify.customerState.ENABLED
-    ) {
-      context.result.errors.push(
-        createError({
-          code: 403,
-          fields: [],
-          type: ERR_CONFLICT,
-          message: "Blocked account",
-          viMessage: "Tài khoản này đã bị chặn",
-        })
-      );
-      context.result.meta.responseCode = responseCodes.accountBlocked;
-      return res.status(409).json(result);
-    }
 
-    return next();
-  } catch (error) {
-    return next(error);
-  }
-}
 /**
  *
  * @param {Levents.Routes.RegisterAccountRequest} req
