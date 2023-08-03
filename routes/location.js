@@ -23,7 +23,7 @@ router.get("/provinces", async (req, res, next) => {
 
     if (params.onlyProvince === true) {
       result.data = await Location.find()
-        .select({ name: 1, code: 1, _id: 0 })
+        .select({ name: 1, code: 1, zip_code: 1, _id: 0 })
         .lean();
       return res.json(result);
     }
