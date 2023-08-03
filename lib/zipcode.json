@@ -1,0 +1,380 @@
+[
+  {
+    "id": "__export__.rapid_province_301_9cf5b69d",
+    "ghn_province_id": 217,
+    "name": "An Giang",
+    "zip_code": "880000"
+  },
+  {
+    "id": "__export__.rapid_province_312_8e775a8b",
+    "ghn_province_id": 206,
+    "name": "Bà Rịa - Vũng Tàu",
+    "zip_code": "790000"
+  },
+  {
+    "id": "__export__.rapid_province_267_1fd56f9d",
+    "ghn_province_id": 253,
+    "name": "Bạc Liêu",
+    "zip_code": "260000"
+  },
+  {
+    "id": "__export__.rapid_province_271_db1bb8f6",
+    "ghn_province_id": 248,
+    "name": "Bắc Giang",
+    "zip_code": "220000"
+  },
+  {
+    "id": "__export__.rapid_province_274_b21cd42f",
+    "ghn_province_id": 245,
+    "name": "Bắc Kạn",
+    "zip_code": "960000"
+  },
+  {
+    "id": "__export__.rapid_province_270_00a7ee4b",
+    "ghn_province_id": 249,
+    "name": "Bắc Ninh",
+    "zip_code": "790000"
+  },
+  {
+    "id": "__export__.rapid_province_305_3280bb9a",
+    "ghn_province_id": 213,
+    "name": "Bến Tre",
+    "zip_code": "930000"
+  },
+  {
+    "id": "__export__.rapid_province_313_902a96dc",
+    "ghn_province_id": 205,
+    "name": "Bình Dương",
+    "zip_code": "590000"
+  },
+  {
+    "id": "__export__.rapid_province_262_0ce20257",
+    "ghn_province_id": 262,
+    "name": "Bình Định",
+    "zip_code": "820000"
+  },
+  {
+    "id": "__export__.rapid_province_280_3a808a84",
+    "ghn_province_id": 239,
+    "name": "Bình Phước",
+    "zip_code": "830000"
+  },
+  {
+    "id": "__export__.rapid_province_266_d4e652a0",
+    "ghn_province_id": 258,
+    "name": "Bình Thuận",
+    "zip_code": "800000"
+  },
+  {
+    "id": "__export__.rapid_province_268_9d29919c",
+    "ghn_province_id": 252,
+    "name": "Cà Mau",
+    "zip_code": "970000"
+  },
+  {
+    "id": "__export__.rapid_province_273_af996f16",
+    "ghn_province_id": 246,
+    "name": "Cao Bằng",
+    "zip_code": "270000"
+  },
+  {
+    "id": "__export__.rapid_province_298_743a30ac",
+    "ghn_province_id": 220,
+    "name": "Cần Thơ",
+    "zip_code": "900000"
+  },
+  {
+    "id": "__export__.rapid_province_315_90fb2198",
+    "ghn_province_id": 203,
+    "name": "Đà Nẵng",
+    "zip_code": "550000"
+  },
+  {
+    "id": "__export__.rapid_province_308_9880a2a7",
+    "ghn_province_id": 210,
+    "name": "Đắk Lắk",
+    "zip_code": "630000"
+  },
+  {
+    "id": "__export__.rapid_province_278_0cdeddb5",
+    "ghn_province_id": 241,
+    "name": "Đắk Nông",
+    "zip_code": "640000"
+  },
+  {
+    "id": "__export__.rapid_province_259_25b21f79",
+    "ghn_province_id": 265,
+    "name": "Điện Biên",
+    "zip_code": "380000"
+  },
+  {
+    "id": "__export__.rapid_province_314_360e2857",
+    "ghn_province_id": 204,
+    "name": "Đồng Nai",
+    "zip_code": "810000"
+  },
+  {
+    "id": "__export__.rapid_province_302_131cc5aa",
+    "ghn_province_id": 216,
+    "name": "Đồng Tháp",
+    "zip_code": "870000"
+  },
+  {
+    "id": "__export__.rapid_province_311_51dfe3c8",
+    "ghn_province_id": 207,
+    "name": "Gia Lai",
+    "zip_code": "600000"
+  },
+  {
+    "id": "__export__.rapid_province_292_18a29c34",
+    "ghn_province_id": 227,
+    "name": "Hà Giang",
+    "zip_code": "310000"
+  },
+  {
+    "id": "__export__.rapid_province_287_80700b93",
+    "ghn_province_id": 232,
+    "name": "Hà Nam",
+    "zip_code": "400000"
+  },
+  {
+    "id": "__export__.rapid_province_321_94e9bdbe",
+    "ghn_province_id": 201,
+    "name": "Hà Nội",
+    "zip_code": "100000"
+  },
+  {
+    "id": "__export__.rapid_province_283_b1a6dccd",
+    "ghn_province_id": 236,
+    "name": "Hà Tĩnh",
+    "zip_code": "480000"
+  },
+  {
+    "id": "__export__.rapid_province_294_260c5f63",
+    "ghn_province_id": 225,
+    "name": "Hải Dương",
+    "zip_code": "170000"
+  },
+  {
+    "id": "__export__.rapid_province_295_4255a03c",
+    "ghn_province_id": 224,
+    "name": "Hải Phòng",
+    "zip_code": "180000"
+  },
+  {
+    "id": "__export__.rapid_province_269_9efc5871",
+    "ghn_province_id": 250,
+    "name": "Hậu Giang",
+    "zip_code": "910000"
+  },
+  {
+    "id": "__export__.rapid_province_257_c04e8028",
+    "ghn_province_id": 267,
+    "name": "Hòa Bình",
+    "zip_code": "350000"
+  },
+  {
+    "id": "__export__.rapid_province_317_2a91903b",
+    "ghn_province_id": 202,
+    "name": "Hồ Chí Minh",
+    "zip_code": "700000"
+  },
+  {
+    "id": "__export__.rapid_province_256_0a6f0180",
+    "ghn_province_id": 268,
+    "name": "Hưng Yên",
+    "zip_code": "160000"
+  },
+  {
+    "id": "__export__.rapid_province_310_dd64c10c",
+    "ghn_province_id": 208,
+    "name": "Khánh Hòa",
+    "zip_code": "650000"
+  },
+  {
+    "id": "__export__.rapid_province_299_814e74f0",
+    "ghn_province_id": 219,
+    "name": "Kiên Giang",
+    "zip_code": "920000"
+  },
+  {
+    "id": "__export__.rapid_province_265_561c064d",
+    "ghn_province_id": 259,
+    "name": "Kon Tum",
+    "zip_code": "580000"
+  },
+  {
+    "id": "__export__.rapid_province_260_d7343474",
+    "ghn_province_id": 264,
+    "name": "Lai Châu",
+    "zip_code": "390000"
+  },
+  {
+    "id": "__export__.rapid_province_272_36ef55ea",
+    "ghn_province_id": 247,
+    "name": "Lạng Sơn",
+    "zip_code": "240000"
+  },
+  {
+    "id": "__export__.rapid_province_255_42c6022a",
+    "ghn_province_id": 269,
+    "name": "Lào Cai",
+    "zip_code": "330000"
+  },
+  {
+    "id": "__export__.rapid_province_309_6eb65518",
+    "ghn_province_id": 209,
+    "name": "Lâm Đồng",
+    "zip_code": "670000"
+  },
+  {
+    "id": "__export__.rapid_province_307_e735f740",
+    "ghn_province_id": 211,
+    "name": "Long An",
+    "zip_code": "850000"
+  },
+  {
+    "id": "__export__.rapid_province_288_8b56d42d",
+    "ghn_province_id": 231,
+    "name": "Nam Định",
+    "zip_code": "420000"
+  },
+  {
+    "id": "__export__.rapid_province_284_91cf0366",
+    "ghn_province_id": 235,
+    "name": "Nghệ An",
+    "zip_code": "460000"
+  },
+  {
+    "id": "__export__.rapid_province_286_233823e0",
+    "ghn_province_id": 233,
+    "name": "Ninh Bình",
+    "zip_code": "430000"
+  },
+  {
+    "id": "__export__.rapid_province_263_fbfd26f5",
+    "ghn_province_id": 261,
+    "name": "Ninh Thuận",
+    "zip_code": "660000"
+  },
+  {
+    "id": "__export__.rapid_province_290_40349840",
+    "ghn_province_id": 229,
+    "name": "Phú Thọ",
+    "zip_code": "290000"
+  },
+  {
+    "id": "__export__.rapid_province_264_ab711bb7",
+    "ghn_province_id": 260,
+    "name": "Phú Yên",
+    "zip_code": "620000"
+  },
+  {
+    "id": "__export__.rapid_province_282_bd164231",
+    "ghn_province_id": 237,
+    "name": "Quảng Bình",
+    "zip_code": "510000"
+  },
+  {
+    "id": "__export__.rapid_province_276_86f731ca",
+    "ghn_province_id": 243,
+    "name": "Quảng Nam",
+    "zip_code": "560000"
+  },
+  {
+    "id": "__export__.rapid_province_277_005f3101",
+    "ghn_province_id": 242,
+    "name": "Quảng Ngãi",
+    "zip_code": "570000"
+  },
+  {
+    "id": "__export__.rapid_province_289_7831237b",
+    "ghn_province_id": 230,
+    "name": "Quảng Ninh",
+    "zip_code": "200000"
+  },
+  {
+    "id": "__export__.rapid_province_281_31454edd",
+    "ghn_province_id": 238,
+    "name": "Quảng Trị",
+    "zip_code": "520000"
+  },
+  {
+    "id": "__export__.rapid_province_300_3ebfa712",
+    "ghn_province_id": 218,
+    "name": "Sóc Trăng",
+    "zip_code": "950000"
+  },
+  {
+    "id": "__export__.rapid_province_258_914d884c",
+    "ghn_province_id": 266,
+    "name": "Sơn La",
+    "zip_code": "360000"
+  },
+  {
+    "id": "__export__.rapid_province_279_b0de9d32",
+    "ghn_province_id": 240,
+    "name": "Tây Ninh",
+    "zip_code": "840000"
+  },
+  {
+    "id": "__export__.rapid_province_293_8ce0252e",
+    "ghn_province_id": 226,
+    "name": "Thái Bình",
+    "zip_code": "410000"
+  },
+  {
+    "id": "__export__.rapid_province_275_9f14b9cb",
+    "ghn_province_id": 244,
+    "name": "Thái Nguyên",
+    "zip_code": "250000"
+  },
+  {
+    "id": "__export__.rapid_province_285_a53766b4",
+    "ghn_province_id": 234,
+    "name": "Thanh Hóa",
+    "zip_code": "440000"
+  },
+  {
+    "id": "__export__.rapid_province_296_ef3c74ac",
+    "ghn_province_id": 223,
+    "name": "Thừa Thiên - Huế",
+    "zip_code": "530000"
+  },
+  {
+    "id": "__export__.rapid_province_306_3b18ad7b",
+    "ghn_province_id": 212,
+    "name": "Tiền Giang",
+    "zip_code": "860000"
+  },
+  {
+    "id": "__export__.rapid_province_304_5662abab",
+    "ghn_province_id": 214,
+    "name": "Trà Vinh",
+    "zip_code": "940000"
+  },
+  {
+    "id": "__export__.rapid_province_291_b5250960",
+    "ghn_province_id": 228,
+    "name": "Tuyên Quang",
+    "zip_code": "300000"
+  },
+  {
+    "id": "__export__.rapid_province_303_0e61156b",
+    "ghn_province_id": 215,
+    "name": "Vĩnh Long",
+    "zip_code": "890000"
+  },
+  {
+    "id": "__export__.rapid_province_297_b8b227de",
+    "ghn_province_id": 221,
+    "name": "Vĩnh Phúc",
+    "zip_code": "280000"
+  },
+  {
+    "id": "__export__.rapid_province_261_271c64d2",
+    "ghn_province_id": 263,
+    "name": "Yên Bái",
+    "zip_code": "320000"
+  }
+]

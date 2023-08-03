@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const locationSchema = new mongoose.Schema({
   code: Number,
   name: String,
+  zip_code: String,
   districts: [
     {
       code: Number,
