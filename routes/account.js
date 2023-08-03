@@ -243,6 +243,15 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
 
     context.customer = { ...uocr.data };
 
+    if (context.customer) {
+      let fullName = helper.makeFullName(
+        context.customer.firstName,
+        context.customer.lastName
+      );
+      fullName = fullName !== "" ? fullName : params.fullName;
+      context.customer.fullName = fullName;
+    }
+
     await _createOrUpdateRegisteredDateToMetafields(req, res, next);
 
     const gsaaur = await shopify.generateAccountActivationUrl({
@@ -1050,6 +1059,15 @@ async function _handleAccountNotExists(req, res, next) {
 
     context.customer = { ...coscr.data };
 
+    if (context.customer) {
+      let fullName = helper.makeFullName(
+        context.customer.firstName,
+        context.customer.lastName
+      );
+      fullName = fullName !== "" ? fullName : params.fullName;
+      context.customer.fullName = fullName;
+    }
+
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
     });
@@ -1095,6 +1113,15 @@ async function _readOneCustomer(req, res, next) {
       }
 
       context.customer = rocr.data ? { ...rocr.data } : null;
+
+      if (context.customer) {
+        let fullName = helper.makeFullName(
+          context.customer.firstName,
+          context.customer.lastName
+        );
+        fullName = fullName !== "" ? fullName : params.fullName;
+        context.customer.fullName = fullName;
+      }
     }
 
     if (!context.customer) {
@@ -1109,6 +1136,15 @@ async function _readOneCustomer(req, res, next) {
       }
 
       context.customer = rocr.data ? { ...rocr.data } : null;
+    }
+
+    if (context.customer) {
+      let fullName = helper.makeFullName(
+        context.customer.firstName,
+        context.customer.lastName
+      );
+      fullName = fullName !== "" ? fullName : params.fullName;
+      context.customer.fullName = fullName;
     }
 
     return next();
