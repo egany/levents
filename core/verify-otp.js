@@ -28,17 +28,20 @@ async function verifyOTP(params) {
   let user;
 
   if (params.phone) {
-    params.phone = params.phone.trim().toLowerCase();
     const parsedPhone = parsePhoneNumber(params.phone, "VN");
     let phoneNumber = parsedPhone.number;
     user = await User.findOne({
       phone: phoneNumber,
-    });
+    }).lean();
     // If user does not exist, create a new user
     if (!user) {
-      user = new User({
+      await User.create({
         phone: phoneNumber,
       });
+
+      user = await User.findOne({
+        phone: phoneNumber,
+      }).lean();
     }
     result.data = {
       phone: phoneNumber,
@@ -46,12 +49,16 @@ async function verifyOTP(params) {
   } else {
     user = await User.findOne({
       email: params.email.trim().toLowerCase(),
-    });
+    }).lean();
     // If user does not exist, create a new user
     if (!user) {
-      user = new User({
+      await User.create({
         email: params.email.trim().toLowerCase(),
       });
+
+      user = await User.findOne({
+        email: params.email.trim().toLowerCase(),
+      }).lean();
     }
     result.data = {
       email: params.email,
@@ -61,8 +68,9 @@ async function verifyOTP(params) {
   // Check if user account is blocked
   if (user.isBlocked) {
     const currentTime = new Date();
+    const blockUntil = new Date(user.blockUntil);
 
-    if (currentTime < user.blockUntil) {
+    if (currentTime < blockUntil) {
       result.errors.push(
         createError({
           type: ERR_FORBIDDEN,
@@ -79,25 +87,39 @@ async function verifyOTP(params) {
     } else {
       user.isBlocked = false;
       user.OTPAttempts = 0;
+      user.OTPCreateAttempts = 0;
     }
+  }
+
+  if (user.OTPAttempts >= process.appSettings.otpMaxAttempts) {
+    user.isBlocked = true;
+    let blockUntil = new Date();
+    blockUntil.setHours(
+      blockUntil.getHours() + process.appSettings.otpBlockedHour
+    );
+    user.blockUntil = blockUntil;
+
+    await User.findByIdAndUpdate(user._id, user);
+
+    result.errors.push(
+      createError({
+        type: ERR_FORBIDDEN,
+        code: 403,
+        message: `You have exceeded the allowed number of times, or try again in ${process.appSettings.otpBlockedHour} hours.`,
+        viMessage: `Bạn đã vượt quá số lần cho phép, hãy thử lại sau ${process.appSettings.otpBlockedHour} tiếng.`,
+      })
+    );
+    result.meta.otpAttempts = user.OTPAttempts;
+    result.meta.otpCreateAttempts = user.OTPCreateAttempts;
+    result.meta.otpBlockUntil = user.blockUntil;
+    result.meta.responseCode = responseCodes.otpBlocked;
+    return result;
   }
 
   // Check OTP
   if (user.OTP !== params.OTP) {
     user.OTPAttempts++;
-
-    // If OTP attempts >= max, block user for x hour
-    if (user.OTPAttempts >= process.appSettings.otpMaxAttempts) {
-      user.isBlocked = true;
-      let blockUntil = new Date();
-      blockUntil.setHours(
-        blockUntil.getHours() + process.appSettings.otpBlockedHour
-      );
-      user.blockUntil = blockUntil;
-    }
-
     await User.findByIdAndUpdate(user._id, { ...user });
-
     result.errors.push(
       createError({
         type: ERR_FORBIDDEN,
@@ -121,6 +143,8 @@ async function verifyOTP(params) {
     currentTime - OTPCreatedTime >
     process.appSettings.otpExpires * 60 * 1000
   ) {
+    user.OTPAttempts++;
+    await User.findByIdAndUpdate(user._id, { ...user });
     result.errors.push(
       createError({
         type: ERR_FORBIDDEN,

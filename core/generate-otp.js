@@ -28,17 +28,20 @@ async function generateOTP(params) {
   let user;
 
   if (params.phone) {
-    params.phone = params.phone.trim().toLowerCase();
     const parsedPhone = parsePhoneNumber(params.phone, "VN");
     let phoneNumber = parsedPhone.number;
     user = await User.findOne({
       phone: phoneNumber,
-    });
+    }).lean();
     // If user does not exist, create a new user
     if (!user) {
-      user = new User({
+      await User.create({
         phone: phoneNumber,
       });
+
+      user = await User.findOne({
+        phone: phoneNumber,
+      }).lean();
     }
     result.data = {
       phone: phoneNumber,
@@ -46,12 +49,16 @@ async function generateOTP(params) {
   } else {
     user = await User.findOne({
       email: params.email.trim().toLowerCase(),
-    });
+    }).lean();
     // If user does not exist, create a new user
     if (!user) {
-      user = new User({
+      await User.create({
         email: params.email.trim().toLowerCase(),
       });
+
+      user = await User.findOne({
+        email: params.email.trim().toLowerCase(),
+      }).lean();
     }
     result.data = {
       email: params.email,
@@ -61,8 +68,9 @@ async function generateOTP(params) {
   // If user is blocked, return an error
   if (user.isBlocked) {
     const currentTime = new Date();
+    const blockUntil = new Date(user.blockUntil);
 
-    if (currentTime < user.blockUntil) {
+    if (currentTime < blockUntil) {
       result.errors.push(
         createError({
           type: ERR_FORBIDDEN,
@@ -91,7 +99,7 @@ async function generateOTP(params) {
     );
     user.blockUntil = blockUntil;
 
-    await user.save();
+    await User.findByIdAndUpdate(user._id, user);
 
     result.errors.push(
       createError({
@@ -128,7 +136,7 @@ async function generateOTP(params) {
   user.OTPCreatedTime = currentTime;
   user.OTPCreateAttempts++;
 
-  await user.save();
+  await User.findByIdAndUpdate(user._id, user);
 
   result.data = { ...result.data, OTP };
   result.meta.otpAttempts = user.OTPAttempts;
