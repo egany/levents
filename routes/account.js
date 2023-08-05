@@ -23,7 +23,6 @@ router.post(
   _verifyOTP,
   _readOneCustomer,
   _handleAccountNotExists,
-  // _handleBlockAccount,
   _handleClassicAccountEmailExists,
   _handleClassicAccountExistsWithSameEmailAndPhone,
   _handleNotClassicAccountExistsWithSameEmailAndPhone,
@@ -164,7 +163,7 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       );
 
       context.result.data = {
-        ...context.customer,
+        ...helper.makeCustomerResponseData(context.customer, params, true),
         needOTPVerification: true,
         sessionId: req.session.sessionId,
         phone: params.phone,
@@ -191,7 +190,7 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       }
 
       context.result.data = {
-        ...context.customer,
+        ...helper.makeCustomerResponseData(context.customer, params, true),
         needOTPVerification: true,
         sessionId: req.session.sessionId,
         otpPhone: beginOTPResult.data.otpPhone,
@@ -223,7 +222,7 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       );
 
       context.result.data = {
-        ...context.customer,
+        ...helper.makeCustomerResponseData(context.customer, params, true),
         needOTPVerification: true,
         sessionId: req.session.sessionId,
         phone: params.phone,
@@ -252,7 +251,7 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       context.customer.fullName = fullName;
     }
 
-    await _createOrUpdateRegisteredDateToMetafields(req, res, next);
+    await _createOrUpdateMetafields(req, res, next);
 
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
@@ -495,7 +494,7 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
       return res.status(500).json(uocr);
     }
 
-    await _createOrUpdateRegisteredDateToMetafields(req, res, next);
+    await _createOrUpdateMetafields(req, res, next);
 
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
@@ -708,7 +707,7 @@ async function _handleNotClassicAccountExistsWithNotSameEmailAndPhone(
       return res.json(context.result);
     }
 
-    await _createOrUpdateRegisteredDateToMetafields(req, res, next);
+    await _createOrUpdateMetafields(req, res, next);
 
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
@@ -901,7 +900,7 @@ async function _handleNotClassicAccountExistsWithSameEmailAndPhone(
       return res.json(context.result);
     }
 
-    await _createOrUpdateRegisteredDateToMetafields(req, res, next);
+    await _createOrUpdateMetafields(req, res, next);
 
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
@@ -1359,50 +1358,41 @@ async function _init(req, res, next) {
  * @param {Levents.Routes.Response} res
  * @param {Levents.Routes.NextFunction} next
  */
-async function _createOrUpdateRegisteredDateToMetafields(req, res, next) {
+async function _createOrUpdateMetafields(req, res, next) {
   const params = req.body;
   const context = req.context;
 
   try {
-    if (
-      shopify.exportMetafieldId(context.customer.metafields, "registeredDate")
-    ) {
-      const _uocr = await shopify.updateOneCustomer({
-        id: context.customer.id,
-        metafields: [
-          {
-            id: shopify.exportMetafieldId(
-              context.customer.metafields,
-              "registeredDate"
-            ),
-            key: "registeredDate",
-            namespace: "levents",
-            type: "single_line_text_field",
-            value: new Date().toISOString(),
-          },
-        ],
-      });
-
-      if (_uocr.errors.length > 0) {
-        console.error(_uocr);
-      }
-    } else {
-      const _uocr = await shopify.updateOneCustomer({
-        id: context.customer.id,
-        metafields: [
-          {
-            key: "registeredDate",
-            namespace: "levents",
-            type: "single_line_text_field",
-            value: new Date().toISOString(),
-          },
-        ],
-      });
-
-      if (_uocr.errors.length > 0) {
-        console.error(_uocr);
+    for (const key of ["fullName", "dateOfBirth", "gender", "registeredDate"]) {
+      if (shopify.exportMetafieldId(context.customer.metafields, key)) {
+        const metafield = context.customer.metafields.find(
+          (m) => m.key === key
+        );
+        metafield.namespace = "levents";
+        metafield.type = "single_line_text_field";
+        metafield.value =
+          key === "registeredDate" ? new Date().toISOString() : params[key];
+      } else {
+        context.customer.metafields.push({
+          key,
+          namespace: "levents",
+          type: "single_line_text_field",
+          value:
+            key === "registeredDate" ? new Date().toISOString() : params[key],
+        });
       }
     }
+
+    const _uocr = await shopify.updateOneCustomer({
+      id: context.customer.id,
+      metafields: context.customer.metafields,
+    });
+
+    if (_uocr.errors.length > 0) {
+      console.error(_uocr);
+    }
+
+    context.customer = _uocr.data ? { ..._uocr.data } : null;
   } catch (error) {
     console.error(error);
   }

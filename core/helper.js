@@ -96,11 +96,48 @@ function makeFullName(firstName, lastName) {
   return fullName;
 }
 
-function makeCustomerResponseData(customer, params) {
+/**
+ *
+ * @param {Levents.Shopify.Metafield[]} metafields
+ */
+function convertMetafieldsToObject(metafields) {
+  const obj = {};
+  for (const m of metafields) {
+    if (m.type === "boolean") {
+      obj[m.key] = m.value === "true" ? true : false;
+    } else if (m.type === "json") {
+      obj[m.key] = JSON.parse(m.value);
+    } else {
+      obj[m.key] = m.value;
+    }
+  }
+  return obj;
+}
+
+/**
+ *
+ * @param {Levents.Shopify.Metafield[]} metafields
+ * @param {string} key
+ */
+function exportMetafieldValue(metafields, key) {
+  const m = convertMetafieldsToObject(metafields);
+  return m[key];
+}
+/**
+ *
+ * @param {Levents.Shopify.Metafield[]} metafields
+ * @param {string} key
+ */
+function exportMetafieldId(metafields, key) {
+  const m = metafields.find((_m) => _m.key === key);
+  return m ? m.id : null;
+}
+
+function makeCustomerResponseData(customer, params, rewrite) {
   let fullName = makeFullName(customer.firstName, customer.lastName);
   fullName = fullName !== "" ? fullName : params.fullName;
 
-  return {
+  let resData = {
     id: customer.id,
     displayName: customer.displayName,
     email: customer.email,
@@ -111,9 +148,57 @@ function makeCustomerResponseData(customer, params) {
     tags: customer.tags,
     verifiedEmail: customer.verifiedEmail,
     metafields: customer.metafields,
-    fullName,
     accountActivationUrl: customer.accountActivationUrl,
+    fullName,
+    gender: exportMetafieldValue(customer.metafields, "gender"),
+    dateOfBirth: exportMetafieldValue(customer.metafields, "dateOfBirth"),
   };
+
+  if (!rewrite) {
+    return resData;
+  }
+
+  if (!resData.email && params.email) {
+    resData.email = params.email;
+  }
+
+  if (!resData.phone && params.phone) {
+    resData.phone = params.phone;
+  }
+
+  if (!resData.gender && params.gender) {
+    resData.gender = params.gender;
+  }
+
+  if (!resData.dateOfBirth && params.dateOfBirth) {
+    resData.dateOfBirth = params.dateOfBirth || params.birthday;
+  }
+
+  if (!resData.birthday && params.birthday) {
+    resData.birthday = params.birthday;
+  }
+
+  for (const key of ["fullName", "dateOfBirth", "gender", "registeredDate"]) {
+    if (exportMetafieldId(resData.metafields, key)) {
+      const metafield = resData.metafields.find((m) => m.key === key);
+      metafield.namespace = "levents";
+      metafield.type = "single_line_text_field";
+      metafield.value =
+        key === "registeredDate" ? new Date().toISOString() : params[key];
+    } else {
+      resData.metafields.push({
+        key,
+        namespace: "levents",
+        type: "single_line_text_field",
+        value:
+          key === "registeredDate"
+            ? new Date().toISOString()
+            : params[key] || params["birthday"],
+      });
+    }
+  }
+
+  return resData;
 }
 
 async function waitWithPromise(ms = 500) {
@@ -132,4 +217,7 @@ module.exports = {
   normalizePort,
   makeCustomerResponseData,
   waitWithPromise,
+  convertMetafieldsToObject,
+  exportMetafieldId,
+  exportMetafieldValue,
 };

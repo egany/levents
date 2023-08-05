@@ -102,6 +102,8 @@ async function test_tc_10(req, res, next) {
       return res.json({ message: "OK" });
     }
 
+    await helper.waitWithPromise(5000);
+
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
       payload,
@@ -161,6 +163,8 @@ async function test_tc_9(req, res, next) {
       return res.json({ message: "OK" });
     }
 
+    await helper.waitWithPromise(5000);
+
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
       payload,
@@ -219,6 +223,8 @@ async function test_tc_8(req, res, next) {
     if (params.run !== "true") {
       return res.json({ message: "OK" });
     }
+
+    await helper.waitWithPromise(5000);
 
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
@@ -287,6 +293,8 @@ async function test_tc_7(req, res, next) {
     if (params.run !== "true") {
       return res.json({ message: "OK" });
     }
+
+    await helper.waitWithPromise(5000);
 
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
@@ -390,6 +398,8 @@ async function test_tc_6(req, res, next) {
     if (params.run !== "true") {
       return res.json({ message: "OK" });
     }
+
+    await helper.waitWithPromise(5000);
 
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
@@ -585,7 +595,7 @@ async function test_tc_5_2(req, res, next) {
       });
     }
 
-    await helper.waitWithPromise(2000);
+    await helper.waitWithPromise(5000);
 
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
@@ -763,6 +773,8 @@ async function test_tc_5_1(req, res, next) {
       });
     }
 
+    await helper.waitWithPromise(5000);
+
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
       payload,
@@ -889,7 +901,7 @@ async function test_tc_4_2_3(req, res, next) {
       });
     }
 
-    await helper.waitWithPromise(2000);
+    await helper.waitWithPromise(5000);
 
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
@@ -1033,7 +1045,7 @@ async function test_tc_4_2_2(req, res, next) {
       });
     }
 
-    await helper.waitWithPromise(2000);
+    await helper.waitWithPromise(5000);
 
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
@@ -1173,7 +1185,7 @@ async function test_tc_4_2_1(req, res, next) {
       });
     }
 
-    await helper.waitWithPromise(2000);
+    await helper.waitWithPromise(5000);
 
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
@@ -1318,13 +1330,13 @@ async function test_tc_4_1(req, res, next) {
       return res.status(500).json(rocr);
     }
 
-    await helper.waitWithPromise(2000);
-
     if (params.run !== "true") {
       return res.json({
         message: "OK",
       });
     }
+
+    await helper.waitWithPromise(5000);
 
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
@@ -1424,7 +1436,7 @@ async function test_tc_3_2(req, res, next) {
       });
     }
 
-    await helper.waitWithPromise(2000);
+    await helper.waitWithPromise(5000);
 
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
@@ -1542,6 +1554,8 @@ async function test_tc_3_1(req, res, next) {
       });
     }
 
+    await helper.waitWithPromise(5000);
+
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
       payload,
@@ -1600,6 +1614,8 @@ async function test_tc_2_2(req, res, next) {
       return res.status(500).json(rocr);
     }
 
+    await helper.waitWithPromise(2000);
+
     if (!rocr.data) {
       rocr = await shopify.readOneCustomer({
         query: {
@@ -1611,6 +1627,8 @@ async function test_tc_2_2(req, res, next) {
         return res.status(500).json(rocr);
       }
     }
+
+    await helper.waitWithPromise(2000);
 
     if (rocr.data) {
       const docr = await shopify.deleteOneCustomer({ id: rocr.data.id });
@@ -1624,17 +1642,17 @@ async function test_tc_2_2(req, res, next) {
 
     const cocr = await shopify.createOneCustomer(accounts.account2);
 
-    await helper.waitWithPromise(2000);
-
     if (cocr.errors.length > 0) {
       return res.status(500).json(cocr);
     }
+
+    await helper.waitWithPromise(2000);
 
     if (params.run !== "true") {
       return res.json({ message: "OK" });
     }
 
-    await helper.waitWithPromise(2000);
+    await helper.waitWithPromise(5000);
 
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
@@ -1736,6 +1754,8 @@ async function test_tc_2_1(req, res, next) {
       });
     }
 
+    await helper.waitWithPromise(5000);
+
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
       payload,
@@ -1802,6 +1822,8 @@ async function test_tc_1(req, res, next) {
     if (params.run !== "true") {
       return res.json({ message: "OK" });
     }
+
+    await helper.waitWithPromise(5000);
 
     let task1 = {
       name: "Submit lần 1 - Yêu cầu đăng ký",
