@@ -251,7 +251,7 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
       context.customer.fullName = fullName;
     }
 
-    await _createOrUpdateMetafields(req, res, next);
+    await _updateCustomer(req, res, next);
 
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
@@ -494,7 +494,9 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
       return res.status(500).json(uocr);
     }
 
-    await _createOrUpdateMetafields(req, res, next);
+    context.customer = uocr.data ? { ...uocr.data } : null;
+
+    await _updateCustomer(req, res, next);
 
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
@@ -707,7 +709,7 @@ async function _handleNotClassicAccountExistsWithNotSameEmailAndPhone(
       return res.json(context.result);
     }
 
-    await _createOrUpdateMetafields(req, res, next);
+    await _updateCustomer(req, res, next);
 
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
@@ -900,7 +902,7 @@ async function _handleNotClassicAccountExistsWithSameEmailAndPhone(
       return res.json(context.result);
     }
 
-    await _createOrUpdateMetafields(req, res, next);
+    await _updateCustomer(req, res, next);
 
     const gsaaur = await shopify.generateAccountActivationUrl({
       id: context.customer.id,
@@ -1358,7 +1360,7 @@ async function _init(req, res, next) {
  * @param {Levents.Routes.Response} res
  * @param {Levents.Routes.NextFunction} next
  */
-async function _createOrUpdateMetafields(req, res, next) {
+async function _updateCustomer(req, res, next) {
   const params = req.body;
   const context = req.context;
 
@@ -1383,9 +1385,21 @@ async function _createOrUpdateMetafields(req, res, next) {
       }
     }
 
+    if (
+      !context?.customer?.firstName &&
+      !context?.customer?.lastName &&
+      !params.fullName
+    ) {
+      const { firstName, lastName } = helper.parseName(params.fullName);
+      context.customer.firstName = firstName;
+      context.customer.lastName = lastName;
+    }
+
     const _uocr = await shopify.updateOneCustomer({
       id: context.customer.id,
       metafields: context.customer.metafields,
+      firstName: context.customer.firstName,
+      lastName: context.customer.lastName,
     });
 
     if (_uocr.errors.length > 0) {

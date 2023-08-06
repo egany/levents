@@ -198,6 +198,12 @@ function makeCustomerResponseData(customer, params, rewrite) {
     }
   }
 
+  if (!resData.firstName && !resData.lastName && params.fullName) {
+    const { firstName, lastName } = parseName(params.fullName);
+    resData.firstName = firstName;
+    resData.lastName = lastName;
+  }
+
   return resData;
 }
 
