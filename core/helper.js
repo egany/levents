@@ -134,9 +134,6 @@ function exportMetafieldId(metafields, key) {
 }
 
 function makeCustomerResponseData(customer, params, rewrite) {
-  let fullName = makeFullName(customer.firstName, customer.lastName);
-  fullName = fullName !== "" ? fullName : params.fullName;
-
   let resData = {
     id: customer.id,
     displayName: customer.displayName,
@@ -149,7 +146,7 @@ function makeCustomerResponseData(customer, params, rewrite) {
     verifiedEmail: customer.verifiedEmail,
     metafields: customer.metafields,
     accountActivationUrl: customer.accountActivationUrl,
-    fullName,
+    fullName: makeFullName(customer.firstName, customer.lastName),
     gender: exportMetafieldValue(customer.metafields, "gender"),
     dateOfBirth: exportMetafieldValue(customer.metafields, "dateOfBirth"),
   };
@@ -171,11 +168,7 @@ function makeCustomerResponseData(customer, params, rewrite) {
   }
 
   if (!resData.dateOfBirth && params.dateOfBirth) {
-    resData.dateOfBirth = params.dateOfBirth || params.birthday;
-  }
-
-  if (!resData.birthday && params.birthday) {
-    resData.birthday = params.birthday;
+    resData.dateOfBirth = params.dateOfBirth;
   }
 
   for (const key of ["fullName", "dateOfBirth", "gender", "registeredDate"]) {
@@ -191,9 +184,7 @@ function makeCustomerResponseData(customer, params, rewrite) {
         namespace: "levents",
         type: "single_line_text_field",
         value:
-          key === "registeredDate"
-            ? new Date().toISOString()
-            : params[key] || params["birthday"],
+          key === "registeredDate" ? new Date().toISOString() : params[key],
       });
     }
   }

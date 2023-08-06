@@ -243,12 +243,11 @@ async function _handleNotClassicAccountEmailExistsAndPhoneNotExists(
     context.customer = { ...uocr.data };
 
     if (context.customer) {
-      let fullName = helper.makeFullName(
-        context.customer.firstName,
-        context.customer.lastName
-      );
-      fullName = fullName !== "" ? fullName : params.fullName;
-      context.customer.fullName = fullName;
+      context.customer.fullName =
+        helper.makeFullName(
+          context.customer.firstName,
+          context.customer.lastName
+        ) || params.fullName;
     }
 
     await _updateCustomer(req, res, next);
@@ -1036,7 +1035,7 @@ async function _handleAccountNotExists(req, res, next) {
           key: "dateOfBirth",
           namespace: "levents",
           type: "single_line_text_field",
-          value: params.birthday,
+          value: params.dateOfBirth,
         },
         {
           key: "gender",
@@ -1061,12 +1060,11 @@ async function _handleAccountNotExists(req, res, next) {
     context.customer = { ...coscr.data };
 
     if (context.customer) {
-      let fullName = helper.makeFullName(
-        context.customer.firstName,
-        context.customer.lastName
-      );
-      fullName = fullName !== "" ? fullName : params.fullName;
-      context.customer.fullName = fullName;
+      context.customer.fullName =
+        helper.makeFullName(
+          context.customer.firstName,
+          context.customer.lastName
+        ) || params.fullName;
     }
 
     const gsaaur = await shopify.generateAccountActivationUrl({
@@ -1116,12 +1114,10 @@ async function _readOneCustomer(req, res, next) {
       context.customer = rocr.data ? { ...rocr.data } : null;
 
       if (context.customer) {
-        let fullName = helper.makeFullName(
+        context.customer.fullName = helper.makeFullName(
           context.customer.firstName,
           context.customer.lastName
         );
-        fullName = fullName !== "" ? fullName : params.fullName;
-        context.customer.fullName = fullName;
       }
     }
 
@@ -1140,12 +1136,10 @@ async function _readOneCustomer(req, res, next) {
     }
 
     if (context.customer) {
-      let fullName = helper.makeFullName(
+      context.customer.fullName = helper.makeFullName(
         context.customer.firstName,
         context.customer.lastName
       );
-      fullName = fullName !== "" ? fullName : params.fullName;
-      context.customer.fullName = fullName;
     }
 
     return next();
@@ -1362,7 +1356,6 @@ async function _init(req, res, next) {
  */
 async function _updateCustomer(req, res, next) {
   const params = req.body;
-  params.dateOfBirth = params.dateOfBirth || params.birthday;
   const context = req.context;
 
   try {
@@ -1371,10 +1364,13 @@ async function _updateCustomer(req, res, next) {
         const metafield = context.customer.metafields.find(
           (m) => m.key === key
         );
-        metafield.namespace = "levents";
-        metafield.type = "single_line_text_field";
-        metafield.value =
-          key === "registeredDate" ? new Date().toISOString() : params[key];
+
+        if (!metafield.value || metafield.value.trim() === "") {
+          metafield.namespace = "levents";
+          metafield.type = "single_line_text_field";
+          metafield.value =
+            key === "registeredDate" ? new Date().toISOString() : params[key];
+        }
       } else {
         context.customer.metafields.push({
           key,

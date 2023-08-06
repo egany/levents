@@ -76,7 +76,7 @@ async function test_tc_10(req, res, next) {
 
     let payload = {
       fullName: accounts.account12.fullName,
-      birthday: accounts.account12.birthday,
+      dateOfBirth: accounts.account12.dateOfBirth,
       gender: accounts.account12.gender,
     };
 
@@ -137,7 +137,7 @@ async function test_tc_9(req, res, next) {
     let payload = {
       phone: accounts.account11.phone,
       fullName: accounts.account11.fullName,
-      birthday: accounts.account11.birthday,
+      dateOfBirth: accounts.account11.dateOfBirth,
       gender: accounts.account11.gender,
     };
 
@@ -198,7 +198,7 @@ async function test_tc_8(req, res, next) {
     let payload = {
       email: accounts.account10.email,
       fullName: accounts.account10.fullName,
-      birthday: accounts.account10.birthday,
+      dateOfBirth: accounts.account10.dateOfBirth,
       gender: accounts.account10.gender,
     };
 
@@ -268,7 +268,7 @@ async function test_tc_7(req, res, next) {
       phone: accounts.account9.phone,
       email: accounts.account9.email,
       fullName: accounts.account9.fullName,
-      birthday: accounts.account9.birthday,
+      dateOfBirth: accounts.account9.dateOfBirth,
       gender: accounts.account9.gender,
     };
 
@@ -373,7 +373,7 @@ async function test_tc_6(req, res, next) {
       phone: accounts.account8.phone,
       email: accounts.account8.email,
       fullName: accounts.account8.fullName,
-      birthday: accounts.account8.birthday,
+      dateOfBirth: accounts.account8.dateOfBirth,
       gender: accounts.account8.gender,
     };
 
@@ -534,7 +534,7 @@ async function test_tc_5_2(req, res, next) {
       phone: accounts.account7.phone,
       email: accounts.account7.email,
       fullName: accounts.account7.fullName,
-      birthday: accounts.account7.birthday,
+      dateOfBirth: accounts.account7.dateOfBirth,
       gender: accounts.account7.gender,
     };
 
@@ -727,7 +727,7 @@ async function test_tc_5_1(req, res, next) {
       phone: accounts.account7.phone,
       email: accounts.account1.email,
       fullName: accounts.account7.fullName,
-      birthday: accounts.account7.birthday,
+      dateOfBirth: accounts.account7.dateOfBirth,
       gender: accounts.account7.gender,
     };
 
@@ -821,7 +821,7 @@ async function test_tc_4_2_3(req, res, next) {
       phone: accounts.account6.phone,
       email: accounts.account6.email,
       fullName: accounts.account6.fullName,
-      birthday: accounts.account6.birthday,
+      dateOfBirth: accounts.account6.dateOfBirth,
       gender: accounts.account6.gender,
     };
 
@@ -984,7 +984,7 @@ async function test_tc_4_2_2(req, res, next) {
       phone: accounts.account5.phone,
       email: accounts.account5.email,
       fullName: accounts.account5.fullName,
-      birthday: accounts.account5.birthday,
+      dateOfBirth: accounts.account5.dateOfBirth,
       gender: accounts.account5.gender,
     };
 
@@ -1127,7 +1127,7 @@ async function test_tc_4_2_1(req, res, next) {
       phone: accounts.account4.phone,
       email: accounts.account5.email,
       fullName: accounts.account4.fullName,
-      birthday: accounts.account4.birthday,
+      dateOfBirth: accounts.account4.dateOfBirth,
       gender: accounts.account4.gender,
     };
 
@@ -1261,7 +1261,7 @@ async function test_tc_4_1(req, res, next) {
       phone: accounts.account1.phone,
       email: accounts.account4.email,
       fullName: accounts.account4.fullName,
-      birthday: accounts.account4.birthday,
+      dateOfBirth: accounts.account4.dateOfBirth,
       gender: accounts.account4.gender,
     };
 
@@ -1382,7 +1382,7 @@ async function test_tc_3_2(req, res, next) {
       phone: accounts.account3.phone,
       email: accounts.account1.email,
       fullName: accounts.account3.fullName,
-      birthday: accounts.account3.birthday,
+      dateOfBirth: accounts.account3.dateOfBirth,
       gender: accounts.account3.gender,
     };
 
@@ -1512,7 +1512,7 @@ async function test_tc_3_1(req, res, next) {
       phone: accounts.account1.phone,
       email: accounts.account2.email,
       fullName: accounts.account1.fullName,
-      birthday: accounts.account1.birthday,
+      dateOfBirth: accounts.account1.dateOfBirth,
       gender: accounts.account1.gender,
     };
 
@@ -1600,7 +1600,7 @@ async function test_tc_2_2(req, res, next) {
       phone: accounts.account2.phone,
       email: accounts.account2.email,
       fullName: accounts.account2.fullName,
-      birthday: accounts.account2.birthday,
+      dateOfBirth: accounts.account2.dateOfBirth,
       gender: accounts.account2.gender,
     };
 
@@ -1728,7 +1728,7 @@ async function test_tc_2_1(req, res, next) {
       phone: accounts.account1.phone,
       email: accounts.account1.email,
       fullName: accounts.account1.fullName,
-      birthday: accounts.account1.birthday,
+      dateOfBirth: accounts.account1.dateOfBirth,
       gender: accounts.account1.gender,
     };
 
@@ -1797,7 +1797,7 @@ async function test_tc_1(req, res, next) {
       phone: accounts.account1.phone,
       email: accounts.account1.email,
       fullName: accounts.account1.fullName,
-      birthday: accounts.account1.birthday,
+      dateOfBirth: accounts.account1.dateOfBirth,
       gender: accounts.account1.gender,
     };
 
@@ -1868,7 +1868,7 @@ async function init(req, res, next) {
       phone: `03830000${id < 10 ? "0" + id : id}`,
       email: `account${id}@gmail.com`,
       fullName: `Account ${id}`,
-      birthday: "1995-05-05T08:17:37.154Z",
+      dateOfBirth: "1995-05-05T08:17:37.154Z",
       gender: "Nam",
       lastName: `Account ${id}`,
     };
