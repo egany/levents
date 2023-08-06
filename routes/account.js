@@ -1362,6 +1362,7 @@ async function _init(req, res, next) {
  */
 async function _updateCustomer(req, res, next) {
   const params = req.body;
+  params.dateOfBirth = params.dateOfBirth || params.birthday;
   const context = req.context;
 
   try {
@@ -1388,7 +1389,7 @@ async function _updateCustomer(req, res, next) {
     if (
       !context?.customer?.firstName &&
       !context?.customer?.lastName &&
-      !params.fullName
+      params.fullName
     ) {
       const { firstName, lastName } = helper.parseName(params.fullName);
       context.customer.firstName = firstName;
