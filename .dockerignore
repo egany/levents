@@ -121,6 +121,7 @@ dist
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+.vscode
 
 # yarn v2
 .yarn/cache
@@ -137,3 +138,7 @@ test
 Dockerfile
 jest.config.js
 README.md
+deploy.sh
+docker-compose*
+dockerize.sh
+

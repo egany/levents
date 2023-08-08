@@ -6,6 +6,6 @@ WORKDIR /levents
 
 ADD . .
 
-RUN npm install
+RUN npm install --production
 
 CMD ["npm", "start"]
