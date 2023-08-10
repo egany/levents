@@ -178,10 +178,16 @@ router.get(
     const totalPages = calculateTotalPages(count, PER_PAGE);
 
     for (let page = 1; page <= totalPages; page++) {
+      let url = `${process.appSettings.judgeMeUrl}/api/v1/reviews?shop_domain=${shop_domain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}&per_page=${PER_PAGE}&page=${page}`;
+
+      if (req.query.rating !== null && req.query.rating !== undefined) {
+        url += `&rating=${req.query.rating}`;
+      }
+
       try {
         const { data } = await axios({
           method: "GET",
-          url: `${process.appSettings.judgeMeUrl}/api/v1/reviews?shop_domain=${shop_domain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}&per_page=${PER_PAGE}&page=${page}`,
+          url,
           headers: {
             "Content-Type": "application/json",
           },
@@ -252,9 +258,15 @@ async function readAllReviewsOfOneProduct(
   let count = 0;
 
   try {
+    let url = `${process.appSettings.judgeMeUrl}/api/v1/reviews/count?shop_domain=${shopDomain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}&reviewer_id=${reviewer.id}`;
+
+    if (req.query.rating !== null && req.query.rating !== undefined) {
+      url += `&rating=${req.query.rating}`;
+    }
+
     const { data } = await axios({
       method: "GET",
-      url: `${process.appSettings.judgeMeUrl}/api/v1/reviews/count?shop_domain=${shopDomain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}&reviewer_id=${reviewer.id}`,
+      url,
       headers: {
         "Content-Type": "application/json",
       },
@@ -279,9 +291,15 @@ async function readAllReviewsOfOneProduct(
 
   for (let page = 1; page <= totalPages; page++) {
     try {
+      let url = `${process.appSettings.judgeMeUrl}/api/v1/reviews?shop_domain=${shopDomain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}&reviewer_id=${reviewer.id}&per_page=${PER_PAGE}&page=${page}`;
+
+      if (req.query.rating !== null && req.query.rating !== undefined) {
+        url += `&rating=${req.query.rating}`;
+      }
+
       const { data } = await axios({
         method: "GET",
-        url: `${process.appSettings.judgeMeUrl}/api/v1/reviews?shop_domain=${shopDomain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}&reviewer_id=${reviewer.id}&per_page=${PER_PAGE}&page=${page}`,
+        url,
         headers: {
           "Content-Type": "application/json",
         },
