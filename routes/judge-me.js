@@ -194,24 +194,36 @@ router.get(
         });
 
         if (Array.isArray(data?.reviews) && data.reviews.length > 0) {
-          for (const rv1 of data?.reviews) {
-            if (
-              rv1.hidden === false &&
-              rv1.published === true &&
-              parseBody(rv1.body) &&
-              !reviews.find(
-                (rv2) => parseBody(rv2.body) && compareRatedId(rv1, rv2)
-              )
-            ) {
-              reviews.push(rv1);
-            }
-          }
+          reviews = [...reviews, ...data.reviews];
         }
       } catch (error) {
         console.error(error);
         return res.status(500).json({
           message: `Read reviews of one product(internal) ${productId} at page ${page} error`,
         });
+      }
+    }
+
+    if (reviews.length === 0) {
+      return reviews;
+    }
+
+    let sortedReviews = reviews.sort((a, b) => {
+      return (
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+    });
+
+    reviews = [];
+
+    for (const rv1 of sortedReviews) {
+      if (
+        rv1.hidden === false &&
+        rv1.published === true &&
+        parseBody(rv1.body) &&
+        !reviews.find((rv2) => parseBody(rv2.body) && compareRatedId(rv1, rv2))
+      ) {
+        reviews.push(rv1);
       }
     }
 
@@ -306,17 +318,7 @@ async function readAllReviewsOfOneProduct(
       });
 
       if (Array.isArray(data?.reviews) && data.reviews.length > 0) {
-        for (const rv1 of data?.reviews) {
-          if (
-            rv1.hidden === false &&
-            parseBody(rv1.body) &&
-            !reviews.find(
-              (rv2) => parseBody(rv2.body) && compareRatedId(rv1, rv2)
-            )
-          ) {
-            reviews.push(rv1);
-          }
-        }
+        reviews = [...reviews, ...data.reviews];
       }
     } catch (error) {
       console.error(error);
@@ -324,6 +326,26 @@ async function readAllReviewsOfOneProduct(
         message: `Read reviews of one product(internal) ${productId} at page ${page} error`,
       });
       return null;
+    }
+  }
+
+  if (reviews.length === 0) {
+    return reviews;
+  }
+
+  let sortedReviews = reviews.sort((a, b) => {
+    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+  });
+
+  reviews = [];
+
+  for (const rv1 of sortedReviews) {
+    if (
+      rv1.hidden === false &&
+      parseBody(rv1.body) &&
+      !reviews.find((rv2) => parseBody(rv2.body) && compareRatedId(rv1, rv2))
+    ) {
+      reviews.push(rv1);
     }
   }
 
