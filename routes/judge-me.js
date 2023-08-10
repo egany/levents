@@ -6,6 +6,8 @@ const {
   fixRequestBody,
 } = require("http-proxy-middleware");
 
+const PER_PAGE = 50;
+
 router.get("/api/v1/reviews/orders", async (req, res, next) => {
   /**@type {string} */
   let product_ids = req.query.product_ids || "";
@@ -129,6 +131,7 @@ router.get(
   async (req, res, next) => {
     const external_id = req.query.product_id;
     const shop_domain = req.query.shop_domain;
+    let productId;
 
     try {
       const { data } = await axios({
@@ -138,35 +141,104 @@ router.get(
           "Content-Type": "application/json",
         },
       });
-      req.query.product_id = data.product.id;
-      return next();
+      productId = data.product.id;
     } catch (error) {
       return next(error);
     }
-  },
-  createProxyMiddleware({
-    target: process.appSettings.judgeMeUrl,
-    changeOrigin: true,
-    pathRewrite: function (path, req) {
-      let newPath = path.replace("/judge-me", "");
-      newPath = updateQueryStringParameter(
-        newPath,
-        "api_token",
-        process.appSettings.judgeMePrivateToken
-      );
-      newPath = updateQueryStringParameter(
-        newPath,
-        "product_id",
-        req.query.product_id
-      );
-      return newPath;
-    },
-    headers: {
-      "Content-Type": "application/json",
-    },
-    secure: false,
-    onProxyReq: fixRequestBody,
-  })
+
+    let count = 0;
+
+    try {
+      const { data } = await axios({
+        method: "GET",
+        url: `${process.appSettings.judgeMeUrl}/api/v1/reviews/count?shop_domain=${shop_domain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      count = data?.count;
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: `Count reviews of one product(internal) ${productId} error`,
+      });
+    }
+
+    let reviews = [];
+
+    if (count === 0) {
+      return res.json({
+        current_page: 1,
+        per_page: 9999,
+        reviews,
+      });
+    }
+
+    const totalPages = calculateTotalPages(count, PER_PAGE);
+
+    for (let page = 1; page <= totalPages; page++) {
+      try {
+        const { data } = await axios({
+          method: "GET",
+          url: `${process.appSettings.judgeMeUrl}/api/v1/reviews?shop_domain=${shop_domain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}&per_page=${PER_PAGE}&page=${page}`,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (Array.isArray(data?.reviews) && data.reviews.length > 0) {
+          for (const rv1 of data?.reviews) {
+            if (
+              rv1.hidden === false &&
+              rv1.published === true &&
+              parseBody(rv1.body) &&
+              !reviews.find(
+                (rv2) => parseBody(rv2.body) && compareRatedId(rv1, rv2)
+              )
+            ) {
+              reviews.push(rv1);
+            }
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+          message: `Read reviews of one product(internal) ${productId} at page ${page} error`,
+        });
+      }
+    }
+
+    return res.json({
+      current_page: 1,
+      per_page: 9999,
+      reviews,
+    });
+  }
+
+  // createProxyMiddleware({
+  //   target: process.appSettings.judgeMeUrl,
+  //   changeOrigin: true,
+  //   pathRewrite: function (path, req) {
+  //     let newPath = path.replace("/judge-me", "");
+  //     newPath = updateQueryStringParameter(
+  //       newPath,
+  //       "api_token",
+  //       process.appSettings.judgeMePrivateToken
+  //     );
+  //     newPath = updateQueryStringParameter(
+  //       newPath,
+  //       "product_id",
+  //       req.query.product_id
+  //     );
+  //     return newPath;
+  //   },
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   secure: false,
+  //   onProxyReq: fixRequestBody,
+  // })
 );
 
 async function readAllReviewsOfOneProduct(
@@ -203,13 +275,13 @@ async function readAllReviewsOfOneProduct(
     return reviews;
   }
 
-  const totalPages = calculateTotalPages(count, 100);
+  const totalPages = calculateTotalPages(count, PER_PAGE);
 
   for (let page = 1; page <= totalPages; page++) {
     try {
       const { data } = await axios({
         method: "GET",
-        url: `${process.appSettings.judgeMeUrl}/api/v1/reviews?shop_domain=${shopDomain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}&reviewer_id=${reviewer.id}&per_page=100&page=${page}`,
+        url: `${process.appSettings.judgeMeUrl}/api/v1/reviews?shop_domain=${shopDomain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}&reviewer_id=${reviewer.id}&per_page=${PER_PAGE}&page=${page}`,
         headers: {
           "Content-Type": "application/json",
         },
