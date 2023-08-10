@@ -9,6 +9,7 @@ const accountRouter = require("./routes/account");
 const locationRouter = require("./routes/location");
 const judgeMeRouter = require("./routes/judge-me");
 const toolsRouter = require("./routes/tools");
+const discountRouter = require("./routes/discount");
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/accounts", accountRouter);
 app.use("/locations", locationRouter);
 app.use("/judge-me", judgeMeRouter);
+app.use("/discounts", discountRouter);
 
 if (process.env.API_TOOLS_ENABLE === "true") {
   app.use("/tools", toolsRouter);

@@ -189,6 +189,14 @@ declare global {
 
       interface DeleteOneMetafieldResult
         extends Core.Result<{ deletedId: string }> {}
+
+      interface ReadManyBasicDiscountCodesParams {
+        // Example: MAX_PRICE or MaxPrice,MinPrice
+        title: string;
+      }
+
+      interface ReadManyBasicDiscountCodesResult
+        extends Core.Result<{ [key: string]: any }[]> {}
     }
 
     interface VerifyOTPParams {
