@@ -227,6 +227,20 @@ router.get(
       }
     }
 
+    if (req.query.sort && req.query.sort === "created_at") {
+      reviews = reviews.sort((a, b) => {
+        return (
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      });
+    } else {
+      reviews = reviews.sort((a, b) => {
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      });
+    }
+
     return res.json({
       current_page: 1,
       per_page: 9999,
