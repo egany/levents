@@ -14,6 +14,59 @@ const {
 const { shopify } = require("../lib");
 const { Session } = require("../model/session");
 
+router.post("/create-no-classic-account", async (req, res, next) => {
+  try {
+    const params = req.body;
+    const ccid = helper.generateLeventGlobalId("customer");
+    const coscr = await shopify.createOneCustomer({
+      email: params.email,
+      phone: params.phone,
+      metafields: [
+        {
+          key: "fullName",
+          namespace: "levents",
+          type: "single_line_text_field",
+          value: params.fullName || "",
+        },
+        {
+          key: "dateOfBirth",
+          namespace: "levents",
+          type: "single_line_text_field",
+          value: params.dateOfBirth || "",
+        },
+        {
+          key: "gender",
+          namespace: "levents",
+          type: "single_line_text_field",
+          value: params.gender || "",
+        },
+        {
+          key: "registeredDate",
+          namespace: "levents",
+          type: "single_line_text_field",
+          value: new Date().toISOString(),
+        },
+        {
+          key: "ccid",
+          namespace: "levents",
+          type: "single_line_text_field",
+          value: ccid,
+        },
+      ],
+      firstName: params.firstName || "",
+      lastName: params.lastName || "",
+      tags: ccid,
+    });
+
+    return res.json(coscr);
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "Register no classic account failed" });
+  }
+});
+
 router.post(
   "/register",
   _init,

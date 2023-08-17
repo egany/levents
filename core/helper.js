@@ -1,5 +1,7 @@
 const { parsePhoneNumber } = require("libphonenumber-js");
 const uuidv4 = require("uuid").v4;
+const { customAlphabet } = require("nanoid");
+const nanoid = customAlphabet("1234567890qwertyuiopasdfghjklzxcvbnm", 10);
 
 /**
  * Normalize a port into a number, string, or false.
@@ -19,6 +21,10 @@ function normalizePort(val) {
   }
 
   return false;
+}
+
+function generateLeventGlobalId(namespace) {
+  return `gid://levents/${namespace}/${nanoid()}`;
 }
 
 function generateSessionId() {
@@ -217,4 +223,5 @@ module.exports = {
   convertMetafieldsToObject,
   exportMetafieldId,
   exportMetafieldValue,
+  generateLeventGlobalId,
 };
