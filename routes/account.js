@@ -1074,6 +1074,7 @@ async function _handleAccountNotExists(req, res, next) {
       return res.json(context.result);
     }
 
+    const ccid = helper.generateLeventGlobalId("customer");
     const coscr = await shopify.createOneCustomer({
       email: params.email,
       phone: params.phone,
@@ -1102,8 +1103,15 @@ async function _handleAccountNotExists(req, res, next) {
           type: "single_line_text_field",
           value: new Date().toISOString(),
         },
+        {
+          key: "ccid",
+          namespace: "levents",
+          type: "single_line_text_field",
+          value: ccid,
+        },
       ],
       ...helper.parseName(params.fullName),
+      tags: ccid,
     });
 
     if (coscr.errors.length > 0) {
