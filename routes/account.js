@@ -17,7 +17,6 @@ const { Session } = require("../model/session");
 router.post("/create-no-classic-account", async (req, res, next) => {
   try {
     const params = req.body;
-    const ccid = helper.generateLeventGlobalId("customer");
     const coscr = await shopify.createOneCustomer({
       email: params.email,
       phone: params.phone,
@@ -46,16 +45,9 @@ router.post("/create-no-classic-account", async (req, res, next) => {
           type: "single_line_text_field",
           value: new Date().toISOString(),
         },
-        {
-          key: "ccid",
-          namespace: "levents",
-          type: "single_line_text_field",
-          value: ccid,
-        },
       ],
       firstName: params.firstName || "",
       lastName: params.lastName || "",
-      tags: ccid,
     });
 
     return res.json(coscr);
@@ -1074,7 +1066,7 @@ async function _handleAccountNotExists(req, res, next) {
       return res.json(context.result);
     }
 
-    const ccid = helper.generateLeventGlobalId("customer");
+    const ccid = helper.generateLeventGlobalId();
     const coscr = await shopify.createOneCustomer({
       email: params.email,
       phone: params.phone,

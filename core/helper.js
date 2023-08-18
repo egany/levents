@@ -23,8 +23,8 @@ function normalizePort(val) {
   return false;
 }
 
-function generateLeventGlobalId(namespace) {
-  return `gid://levents/${namespace}/${nanoid()}`;
+function generateLeventGlobalId() {
+  return `Shopify_Levents_${nanoid()}${new Date().getTime()}`;
 }
 
 function generateSessionId() {
