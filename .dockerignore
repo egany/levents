@@ -141,4 +141,5 @@ README.md
 deploy.sh
 docker-compose*
 dockerize.sh
-
+seeddata
+./tools.js
