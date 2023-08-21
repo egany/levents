@@ -1051,7 +1051,7 @@ async function _handleAccountNotExists(req, res, next) {
           value: new Date().toISOString(),
         },
         {
-          key: "ccid",
+          key: "odooCustomerId",
           namespace: "levents",
           type: "single_line_text_field",
           value: ccid,
