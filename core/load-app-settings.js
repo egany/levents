@@ -29,6 +29,8 @@ const {
   JUDGE_ME_URL,
   JUDGE_ME_PRIVATE_TOKEN,
   JUDGE_ME_PUBLIC_TOKEN,
+
+  CORS_ALLOWED_ORIGIN,
 } = process.env;
 
 process.appSettings = {
@@ -62,4 +64,6 @@ process.appSettings = {
   judgeMeUrl: JUDGE_ME_URL,
   judgeMePrivateToken: JUDGE_ME_PRIVATE_TOKEN,
   judgeMePublicToken: JUDGE_ME_PUBLIC_TOKEN,
+
+  corsAllowedOrigin: CORS_ALLOWED_ORIGIN,
 };

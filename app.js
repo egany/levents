@@ -13,7 +13,18 @@ const discountRouter = require("./routes/discount");
 
 const app = express();
 
-app.use(cors());
+let whitelist = [process.env.CORS_ALLOWED_ORIGIN || "*"];
+let corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
+
+app.use(cors(corsOptions));
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
