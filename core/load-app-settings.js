@@ -31,6 +31,10 @@ const {
   JUDGE_ME_PUBLIC_TOKEN,
 
   CORS_ALLOWED_ORIGIN,
+
+  ODOO_API_URL,
+  ODOO_CLIENT_KEY,
+  ODOO_CLIENT_SECRET,
 } = process.env;
 
 process.appSettings = {
@@ -66,4 +70,8 @@ process.appSettings = {
   judgeMePublicToken: JUDGE_ME_PUBLIC_TOKEN,
 
   corsAllowedOrigin: CORS_ALLOWED_ORIGIN,
+
+  odooApiUrl: ODOO_API_URL,
+  odooClientKey: ODOO_CLIENT_KEY,
+  odooClientSecret: ODOO_CLIENT_SECRET,
 };

@@ -10,10 +10,21 @@ const locationRouter = require("./routes/location");
 const judgeMeRouter = require("./routes/judge-me");
 const toolsRouter = require("./routes/tools");
 const discountRouter = require("./routes/discount");
+const odooRouter = require("./routes/odoo");
 
 const app = express();
 
-let whitelist = [process.env.CORS_ALLOWED_ORIGIN || "*"];
+let whitelist = process.env.CORS_ALLOWED_ORIGIN
+  ? process.env.CORS_ALLOWED_ORIGIN.split(",")
+      .filter(
+        (o) =>
+          o !== undefined &&
+          o !== null &&
+          typeof o === "string" &&
+          o.trim() !== ""
+      )
+      .map((o) => o.trim())
+  : ["*"];
 let corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
@@ -40,6 +51,7 @@ app.use("/accounts", accountRouter);
 app.use("/locations", locationRouter);
 app.use("/judge-me", judgeMeRouter);
 app.use("/discounts", discountRouter);
+app.use("/odoo", odooRouter);
 
 if (process.env.API_TOOLS_ENABLE === "true") {
   app.use("/tools", toolsRouter);
