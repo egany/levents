@@ -35,6 +35,11 @@ const {
   ODOO_API_URL,
   ODOO_CLIENT_KEY,
   ODOO_CLIENT_SECRET,
+
+  VIHAT_BRANDNAME,
+  VIHAT_API_URL,
+  VIHAT_API_KEY,
+  VIHAT_SECRET_KEY,
 } = process.env;
 
 process.appSettings = {
@@ -74,4 +79,9 @@ process.appSettings = {
   odooApiUrl: ODOO_API_URL,
   odooClientKey: ODOO_CLIENT_KEY,
   odooClientSecret: ODOO_CLIENT_SECRET,
+
+  vihatBrandname: VIHAT_BRANDNAME,
+  vihatApiUrl: VIHAT_API_URL,
+  vihatApiKey: VIHAT_API_KEY,
+  vihatSecretKey: VIHAT_SECRET_KEY,
 };
