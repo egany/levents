@@ -6,28 +6,8 @@ const {
   fixRequestBody,
 } = require("http-proxy-middleware");
 
-// router.post(
-//   "/api/v2/authentication/oauth2/token",
-//   createProxyMiddleware({
-//     target: process.appSettings.odooApiUrl,
-//     changeOrigin: true,
-//     pathRewrite: function (path, req) {
-//       return path.replace("/odoo", "");
-//     },
-//     headers: {
-//       Authorization: `Basic ${Buffer.from(
-//         process.appSettings.odooClientKey +
-//           ":" +
-//           process.appSettings.odooClientSecret
-//       ).toString("base64")}`,
-//     },
-//     secure: false,
-//     onProxyReq: fixRequestBody,
-//   })
-// );
-
 router.post(
-  "/api/v2/call/loyalty.card/redeem_voucher",
+  "/api/v2/call",
   async (req, res, next) => {
     try {
       const { data } = await axios({
