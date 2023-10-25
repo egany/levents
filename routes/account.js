@@ -8,11 +8,15 @@ const {
   helper,
   sendEmailOTP,
   sendPhoneOTP,
+  sendPhoneForgotEmail,
   verifyOTP,
   responseCodes,
 } = require("../core");
 const { shopify } = require("../lib");
 const { Session } = require("../model/session");
+const { ERR_NOT_FOUND } = require("../core/errors");
+
+router.post("/forgot-email", _forgotEmail);
 
 router.post(
   "/register",
@@ -32,6 +36,87 @@ router.post(
   _handleNotClassicAccountEmailNotExistsAndPhoneExists,
   _handleNotClassicAccountEmailExistsAndPhoneNotExists
 );
+
+/**
+ *
+ * @param {Levents.Routes.RegisterAccountRequest} req
+ * @param {Levents.Routes.Response} res
+ */
+async function _forgotEmail(req, res) {
+  const params = req.body;
+  const errors = [];
+
+  if (!params.phone) {
+    errors.push(
+      createError({
+        code: 400,
+        type: ERR_INVALID_ARGS,
+        fields: ["phone"],
+        message: "Missing the field",
+        viMessage: "Thiếu thông tin",
+      })
+    );
+  } else if (parsePhoneNumber(params.phone, "VN").number.length != 12) {
+    errors.push(
+      createError({
+        code: 400,
+        type: ERR_INVALID_ARGS,
+        fields: ["phone"],
+        message: "Phone invalid",
+        viMessage: "Số điện thoại không hợp lệ",
+      })
+    );
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  if (params.phone) {
+    const rocr = await shopify.readOneCustomer({
+      query: {
+        phone: params.phone,
+      },
+    });
+
+    if (rocr.errors.length > 0) {
+      return res.status(500).json(rocr);
+    }
+
+    let customer = rocr.data ? { ...rocr.data } : null;
+
+    if (customer.state !== shopify.customerState.ENABLED) {
+      errors.push(
+        createError({
+          code: 404,
+          fields: [],
+          type: ERR_NOT_FOUND,
+          message: "Account not found",
+          viMessage: "Tài khoản này không tồn tại",
+        })
+      )
+
+      return res.status(404).json({ errors });
+    }
+
+    if (!customer.email) {
+      errors.push(
+        createError({
+          code: 422,
+          fields: [],
+          type: ERR_NOT_FOUND,
+          message: "Email not found",
+          viMessage: "Tài khoản này không có email",
+        })
+      )
+
+      return res.status(422).json({ errors });
+    }
+
+    await sendPhoneForgotEmail({ email: customer.email, phone: customer.phone })
+  }
+}
+
 /**
  *
  * @param {Levents.Routes.RegisterAccountRequest} req
@@ -1172,13 +1257,13 @@ async function _verifyOTP(req, res, next) {
 
     let verifyOTPResult = params.otpPhone
       ? await verifyOTP({
-          phone: context.standardizedPhoneNumber,
-          OTP: params.otp,
-        })
+        phone: context.standardizedPhoneNumber,
+        OTP: params.otp,
+      })
       : await verifyOTP({
-          email: params.email,
-          OTP: params.otp,
-        });
+        email: params.email,
+        OTP: params.otp,
+      });
 
     if (verifyOTPResult.errors.length > 0) {
       verifyOTPResult.data = {
@@ -1433,11 +1518,11 @@ async function beginOTP(args) {
   try {
     const generateOTPResult = phone
       ? await generateOTP({
-          phone,
-        })
+        phone,
+      })
       : await generateOTP({
-          email,
-        });
+        email,
+      });
 
     if (generateOTPResult.errors.length > 0) {
       res.status(403).json(generateOTPResult);

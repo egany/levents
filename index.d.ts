@@ -253,6 +253,33 @@ declare global {
       referentId: string;
     }
 
+    interface SendPhoneForgotEmailParams {
+      phone: string;
+      email: string;
+    }
+
+    interface SendPhoneForgotResult {
+      sendMessage: {
+        to: string;
+        telco: string;
+        orderCode: string;
+        packageCode: string;
+        type: number;
+        from: string;
+        message: string;
+        scheduled: string;
+        requestId: string;
+        useUnicode: 0 | 1 | 2;
+        ext: {};
+      };
+      msgLength: number;
+      mtCount: number;
+      account: string;
+      errorCode: string;
+      errorMessage: string;
+      referentId: string;
+    }
+
     namespace Routes {
       interface RegisterAccountParams {
         email: string;
