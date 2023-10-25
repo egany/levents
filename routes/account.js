@@ -46,74 +46,81 @@ async function _forgotEmail(req, res) {
   const params = req.body;
   const errors = [];
 
-  if (!params.phone) {
-    errors.push(
-      createError({
-        code: 400,
-        type: ERR_INVALID_ARGS,
-        fields: ["phone"],
-        message: "Missing the field",
-        viMessage: "Thiếu thông tin",
-      })
-    );
-  } else if (parsePhoneNumber(params.phone, "VN").number.length != 12) {
-    errors.push(
-      createError({
-        code: 400,
-        type: ERR_INVALID_ARGS,
-        fields: ["phone"],
-        message: "Phone invalid",
-        viMessage: "Số điện thoại không hợp lệ",
-      })
-    );
-  }
-
-  if (errors.length > 0) {
-    return res.status(400).json({ errors });
-  }
-
-  if (params.phone) {
-    const rocr = await shopify.readOneCustomer({
-      query: {
-        phone: params.phone,
-      },
-    });
-
-    if (rocr.errors.length > 0) {
-      return res.status(500).json(rocr);
-    }
-
-    let customer = rocr.data ? { ...rocr.data } : null;
-
-    if (customer.state !== shopify.customerState.ENABLED) {
+  try {
+    if (!params.phone) {
       errors.push(
         createError({
-          code: 404,
-          fields: [],
-          type: ERR_NOT_FOUND,
-          message: "Account not found",
-          viMessage: "Tài khoản này không tồn tại",
+          code: 400,
+          type: ERR_INVALID_ARGS,
+          fields: ["phone"],
+          message: "Missing the field",
+          viMessage: "Thiếu thông tin",
         })
-      )
-
-      return res.status(404).json({ errors });
-    }
-
-    if (!customer.email) {
+      );
+    } else if (parsePhoneNumber(params.phone, "VN").number.length != 12) {
       errors.push(
         createError({
-          code: 422,
-          fields: [],
-          type: ERR_NOT_FOUND,
-          message: "Email not found",
-          viMessage: "Tài khoản này không có email",
+          code: 400,
+          type: ERR_INVALID_ARGS,
+          fields: ["phone"],
+          message: "Phone invalid",
+          viMessage: "Số điện thoại không hợp lệ",
         })
-      )
-
-      return res.status(422).json({ errors });
+      );
     }
 
-    await sendPhoneForgotEmail({ email: customer.email, phone: customer.phone })
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
+    if (params.phone) {
+      const rocr = await shopify.readOneCustomer({
+        query: {
+          phone: params.phone,
+        },
+      });
+
+      if (rocr.errors.length > 0) {
+        return res.status(500).json(rocr);
+      }
+
+      let customer = rocr.data ? { ...rocr.data } : null;
+
+      if (customer.state !== shopify.customerState.ENABLED) {
+        errors.push(
+          createError({
+            code: 404,
+            fields: [],
+            type: ERR_NOT_FOUND,
+            message: "Account not found",
+            viMessage: "Tài khoản này không tồn tại",
+          })
+        )
+
+        return res.status(404).json({ errors });
+      }
+
+      if (!customer.email) {
+        errors.push(
+          createError({
+            code: 422,
+            fields: [],
+            type: ERR_NOT_FOUND,
+            message: "Email not found",
+            viMessage: "Tài khoản này không có email",
+          })
+        )
+
+        return res.status(422).json({ errors });
+      }
+
+      await sendPhoneForgotEmail({ email: customer.email, phone: params.phone });
+
+      res.json({ message: "ok" })
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: "errors" })
   }
 }
 
