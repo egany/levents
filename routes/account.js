@@ -86,6 +86,20 @@ async function _forgotEmail(req, res) {
 
       let customer = rocr.data ? { ...rocr.data } : null;
 
+      if(!customer) {
+        errors.push(
+          createError({
+            code: 404,
+            fields: [],
+            type: ERR_NOT_FOUND,
+            message: "Account not found",
+            viMessage: "Tài khoản này không tồn tại",
+          })
+        )
+
+        return res.status(404).json({ errors });
+      }
+
       if (customer.state !== shopify.customerState.ENABLED) {
         errors.push(
           createError({
