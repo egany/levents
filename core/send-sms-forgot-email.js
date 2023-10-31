@@ -50,7 +50,7 @@ async function sendPhoneForgotEmailWithVihat(params) {
       },
       data: {
         ApiKey: process.appSettings.vihatApiKey,
-        Content: `(LEVENTS) ${params.email} la ma xac thuc (email) cua ban tai website levents.asia. Vui long khong chia se ma xac thuc cho bat ky ai. Xin cam on va chuc ban mua sam vui ve!`,
+        Content: `(LEVENTS) Ban dang YEU CAU CAP LAI EMAIL DANG NHAP. Vui long su dung ten dang nhap: ${params.email} de truy cap`,
         Phone: params.phone,
         SecretKey: process.appSettings.vihatSecretKey,
         IsUnicode: "0",
