@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { parsePhoneNumber } = require("libphonenumber-js");
-const { createError, ERR_INVALID_ARGS, ERR_CONFLICT } =
+const { createError, ERR_INVALID_ARGS, ERR_CONFLICT, ERR_LIMITED, ERR_NOT_FOUND, ERR_FORBIDDEN } =
   require("../core").errors;
 const {
   generateOTP,
@@ -14,7 +14,7 @@ const {
 } = require("../core");
 const { shopify } = require("../lib");
 const { Session } = require("../model/session");
-const { ERR_NOT_FOUND } = require("../core/errors");
+const { ForgotEmail } = require("../model/forgot-email");
 
 router.post("/forgot-email", _forgotEmail);
 
@@ -73,65 +73,153 @@ async function _forgotEmail(req, res) {
       return res.status(400).json({ errors });
     }
 
-    if (params.phone) {
-      const rocr = await shopify.readOneCustomer({
-        query: {
-          phone: params.phone,
-        },
+    /**@type {import('../model/forgot-email')} */
+    let _forgotEmail;
+    const parsedPhone = parsePhoneNumber(params.phone, "VN");
+    let phoneNumber = parsedPhone.number;
+    _forgotEmail = await ForgotEmail.findOne({
+      phone: phoneNumber,
+    }).lean();
+    // If it does not exist, create a new
+    if (!_forgotEmail) {
+      await ForgotEmail.create({
+        phone: phoneNumber,
       });
 
-      if (rocr.errors.length > 0) {
-        return res.status(500).json(rocr);
-      }
-
-      let customer = rocr.data ? { ...rocr.data } : null;
-
-      if(!customer) {
-        errors.push(
-          createError({
-            code: 404,
-            fields: [],
-            type: ERR_NOT_FOUND,
-            message: "Account not found",
-            viMessage: "Tài khoản này không tồn tại",
-          })
-        )
-
-        return res.status(404).json({ errors });
-      }
-
-      if (customer.state !== shopify.customerState.ENABLED) {
-        errors.push(
-          createError({
-            code: 404,
-            fields: [],
-            type: ERR_NOT_FOUND,
-            message: "Account not found",
-            viMessage: "Tài khoản này không tồn tại",
-          })
-        )
-
-        return res.status(404).json({ errors });
-      }
-
-      if (!customer.email) {
-        errors.push(
-          createError({
-            code: 422,
-            fields: [],
-            type: ERR_NOT_FOUND,
-            message: "Email not found",
-            viMessage: "Tài khoản này không có email",
-          })
-        )
-
-        return res.status(422).json({ errors });
-      }
-
-      await sendPhoneForgotEmail({ email: customer.email, phone: params.phone });
-
-      res.json({ message: "ok" })
+      _forgotEmail = await ForgotEmail.findOne({
+        phone: phoneNumber,
+      }).lean();
     }
+
+    // Check if is blocked
+    if (_forgotEmail.isBlocked) {
+      const currentTime = new Date();
+      const blockUntil = new Date(_forgotEmail.blockUntil);
+
+      if (currentTime < blockUntil) {
+        errors.push(
+          createError({
+            type: ERR_FORBIDDEN,
+            code: 403,
+            message: `You have exceeded the allowed number of times, or try again in ${process.appSettings.otpBlockedHour} hours.`,
+            viMessage: `Bạn đã vượt quá số lần cho phép, hãy thử lại sau ${process.appSettings.otpBlockedHour} tiếng.`,
+            data: {
+              ..._forgotEmail
+            }
+          })
+        );
+        return res.status(403).json({ errors });
+      } else {
+        _forgotEmail.isBlocked = false;
+        _forgotEmail.attempts = 0;
+      }
+    }
+
+    if (_forgotEmail.attempts >= process.appSettings.otpMaxAttempts) {
+      _forgotEmail.isBlocked = true;
+      let blockUntil = new Date();
+      blockUntil.setHours(
+        blockUntil.getHours() + process.appSettings.otpBlockedHour
+      );
+      _forgotEmail.blockUntil = blockUntil;
+
+      await ForgotEmail.findByIdAndUpdate(_forgotEmail._id, _forgotEmail);
+
+      errors.push(
+        createError({
+          type: ERR_FORBIDDEN,
+          code: 403,
+          message: `You have exceeded the allowed number of times, or try again in ${process.appSettings.otpBlockedHour} hours.`,
+          viMessage: `Bạn đã vượt quá số lần cho phép, hãy thử lại sau ${process.appSettings.otpBlockedHour} tiếng.`,
+          data: {
+            ..._forgotEmail
+          }
+        })
+      );
+      return res.status(403).json({ errors });
+    }
+
+    _forgotEmail.attempts++;
+    await ForgotEmail.findByIdAndUpdate(_forgotEmail._id, { ..._forgotEmail });
+
+    let currentTime = new Date();
+    let latestRequestedTime = new Date(_forgotEmail.latestRequestedTime);
+
+    if (currentTime - latestRequestedTime < 3000) {
+      errors.push(
+        createError({
+          type: ERR_LIMITED,
+          code: 403,
+          message: "You can only make each request after 3 seconds.",
+          viMessage: "Bạn chỉ có thể thực hiện mỗi yêu cầu sau 3 giây.",
+          data: {
+            ..._forgotEmail
+          }
+        })
+      );
+      return res.status(403).json({ errors });
+    }
+
+    _forgotEmail.latestRequestedTime = new Date();
+    await ForgotEmail.findByIdAndUpdate(_forgotEmail._id, { ..._forgotEmail });
+
+    const rocr = await shopify.readOneCustomer({
+      query: {
+        phone: params.phone,
+      },
+    });
+
+    if (rocr.errors.length > 0) {
+      return res.status(500).json(rocr);
+    }
+
+    let customer = rocr.data ? { ...rocr.data } : null;
+
+    if (!customer) {
+      errors.push(
+        createError({
+          code: 404,
+          fields: [],
+          type: ERR_NOT_FOUND,
+          message: "Account not found",
+          viMessage: "Tài khoản này không tồn tại",
+        })
+      )
+
+      return res.status(404).json({ errors });
+    }
+
+    if (customer.state !== shopify.customerState.ENABLED) {
+      errors.push(
+        createError({
+          code: 404,
+          fields: [],
+          type: ERR_NOT_FOUND,
+          message: "Account not found",
+          viMessage: "Tài khoản này không tồn tại",
+        })
+      )
+
+      return res.status(404).json({ errors });
+    }
+
+    if (!customer.email) {
+      errors.push(
+        createError({
+          code: 422,
+          fields: [],
+          type: ERR_NOT_FOUND,
+          message: "Email not found",
+          viMessage: "Tài khoản này không có email",
+        })
+      )
+
+      return res.status(422).json({ errors });
+    }
+
+    await sendPhoneForgotEmail({ email: customer.email, phone: params.phone });
+
+    res.json({ message: "ok" })
   } catch (error) {
     console.log(error)
     res.status(500).json({ message: "errors" })
