@@ -6,18 +6,17 @@ const sgMail = require("@sendgrid/mail");
  */
 async function sendEmailOTP(params) {
   sgMail.setApiKey(process.appSettings.sendgridApiKey);
+  sgMail.setApiKey(SENDGRID_API_KEY);
+  let text = `${params.OTP} là mã xác thực (OTP) của bạn tại website levents.asia. Vui lòng không chia sẻ mã xác thực dưới bất kỳ hình thức nào. Xin cảm ơn và chúc bạn mua sắm vui vẻ!`
   const msg = {
     to: params.email,
     from: process.appSettings.sendgridMailer, // Use the email address or domain you verified above
-    subject: "Levents thong bao ma OTP",
-    text: "Levents thong bao ma OTP",
-    html: `<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
-      <div style="margin:50px auto;width:70%;padding:20px 0">
-        <div style="border-bottom:1px solid #eee">
-          <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">${process.appSettings.brand}</a>
-        </div>
-        <p>Levents thong bao ma OTP ${params.OTP} tren website https://levents.asia/ la ma xac minh cua ban. KHONG chia se ma cho bat ky ai duoi hinh thuc nao.</p>
-      </div>
+    from: SENDGRID_MAILER, // Use the email address or domain you verified above
+    subject: `${params.OTP} là mã xác thực (OTP) của bạn`,
+    text: `${text}`,
+    html: `<div>
+      <p>LEVENTS</p>
+      <p>${text}</p>
     </div>`,
   };
   try {
