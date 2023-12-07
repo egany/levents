@@ -529,39 +529,6 @@ async function _handleNotClassicAccountEmailNotExistsAndPhoneExists(
       return next();
     }
 
-    let rocr = await shopify.readOneCustomer({
-      query: {
-        email: params.email,
-        id: context.customer.id,
-      },
-      not: ["id"],
-    });
-
-    if (rocr.errors.length > 0) {
-      return res.status(500).json(rocr);
-    }
-
-    const otherCustomer = rocr.data ? { ...rocr.data } : null;
-
-    if (otherCustomer) {
-      context.result.errors.push(
-        createError({
-          code: 409,
-          fields: ["email"],
-          type: ERR_CONFLICT,
-          message: "Email already exists",
-          viMessage: "Email đã tồn tại",
-        })
-      );
-      context.result.data.needOTPVerification = true;
-      context.result.data.sessionId = req.session.sessionId;
-      context.result.data.email = null;
-      context.result.meta.responseCode =
-        responseCodes.conflictEmailWithPhoneExists;
-
-      return res.status(409).json(context.result);
-    }
-
     if (!params.needOTPVerification) {
       context.result.errors.push(
         createError({
@@ -801,7 +768,7 @@ async function _handleNotClassicAccountExistsWithNotSameEmailAndPhone(
     ) {
       return next();
     }
-
+    
     const same =
       params.email === context.customer.email &&
       helper.comparePhoneNumber(params.phone, context.customer.phone);
