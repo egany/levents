@@ -129,62 +129,36 @@ router.post(
 router.get(
   "/api/v1/reviews",
   async (req, res, next) => {
-    const external_id = req.query.product_id;
-    const shop_domain = req.query.shop_domain;
-    let productId;
-
     try {
-      const { data } = await axios({
-        method: "GET",
-        url: `${process.appSettings.judgeMeUrl}/api/v1/products/-1?shop_domain=${shop_domain}&api_token=${process.appSettings.judgeMePrivateToken}&external_id=${external_id}`,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      productId = data.product.id;
-    } catch (error) {
-      return next(error);
-    }
-
-    let count = 0;
-
-    try {
-      const { data } = await axios({
-        method: "GET",
-        url: `${process.appSettings.judgeMeUrl}/api/v1/reviews/count?shop_domain=${shop_domain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}`,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      count = data?.count;
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-        message: `Count reviews of one product(internal) ${productId} error`,
-      });
-    }
-
-    let reviews = [];
-
-    if (count === 0) {
-      return res.json({
-        current_page: 1,
-        per_page: 9999,
-        reviews,
-      });
-    }
-
-    const totalPages = calculateTotalPages(count, PER_PAGE);
-
-    for (let page = 1; page <= totalPages; page++) {
-      let url = `${process.appSettings.judgeMeUrl}/api/v1/reviews?shop_domain=${shop_domain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}&per_page=${PER_PAGE}&page=${page}`;
-
-      if (req.query.rating !== null && req.query.rating !== undefined) {
-        url += `&rating=${req.query.rating}`;
-      }
+      const external_id = req.query.product_id;
+      const shop_domain = req.query.shop_domain;
+      let productId;
 
       try {
+        const { data } = await axios({
+          method: "GET",
+          url: `${process.appSettings.judgeMeUrl}/api/v1/products/-1?shop_domain=${shop_domain}&api_token=${process.appSettings.judgeMePrivateToken}&external_id=${external_id}`,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        productId = data.product.id;
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+          message: `Read product from Judge me ${external_id} (external_id) error`,
+        });
+      }
+
+      let count = 0;
+
+      try {
+        let url = `${process.appSettings.judgeMeUrl}/api/v1/reviews/count?shop_domain=${shop_domain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}`;
+
+        if (req.query.rating !== null && req.query.rating !== undefined) {
+          url += `&rating=${Number.parseInt(req.query.rating)}`;
+        }
+
         const { data } = await axios({
           method: "GET",
           url,
@@ -193,59 +167,118 @@ router.get(
           },
         });
 
-        if (Array.isArray(data?.reviews) && data.reviews.length > 0) {
-          reviews = [...reviews, ...data.reviews];
+        if (Number.isInteger(data?.count)) {
+          count = data?.count;
         }
       } catch (error) {
         console.error(error);
         return res.status(500).json({
-          message: `Read reviews of one product(internal) ${productId} at page ${page} error`,
+          message: `Count reviews of one product(internal) ${productId} error`,
         });
       }
-    }
 
-    if (reviews.length === 0) {
-      return reviews;
-    }
+      let reviews = [];
 
-    let sortedReviews = reviews.sort((a, b) => {
-      return (
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      );
-    });
-
-    reviews = [];
-
-    for (const rv1 of sortedReviews) {
-      if (
-        rv1.hidden === false &&
-        rv1.published === true &&
-        parseBody(rv1.body) &&
-        !reviews.find((rv2) => parseBody(rv2.body) && compareRatedId(rv1, rv2))
-      ) {
-        reviews.push(rv1);
+      if (count === 0) {
+        return res.json({
+          current_page: 1,
+          per_page: 9999,
+          reviews,
+          rating: req.query.rating,
+          count,
+          res_number: 1,
+        });
       }
-    }
 
-    if (req.query.sort && req.query.sort === "created_at") {
-      reviews = reviews.sort((a, b) => {
+      const totalPages = calculateTotalPages(count, PER_PAGE);
+
+      for (let page = 1; page <= totalPages; page++) {
+        let url = `${process.appSettings.judgeMeUrl}/api/v1/reviews?shop_domain=${shop_domain}&api_token=${process.appSettings.judgeMePrivateToken}&product_id=${productId}&per_page=${PER_PAGE}&page=${page}`;
+
+        if (req.query.rating !== null && req.query.rating !== undefined) {
+          url += `&rating=${Number.parseInt(req.query.rating)}`;
+        }
+
+        try {
+          const { data } = await axios({
+            method: "GET",
+            url,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (Array.isArray(data?.reviews) && data.reviews.length > 0) {
+            reviews = [...reviews, ...data.reviews];
+          }
+        } catch (error) {
+          console.error(error);
+          return res.status(500).json({
+            message: `Read reviews of one product(internal) ${productId} at page ${page} error`,
+          });
+        }
+      }
+
+      if (reviews.length === 0) {
+        return res.json({
+          current_page: 1,
+          per_page: 9999,
+          reviews,
+          rating: req.query.rating,
+          count: 0,
+          res_number: 2,
+        });
+      }
+
+      let sortedReviews = reviews.sort((a, b) => {
         return (
           new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         );
       });
-    } else {
-      reviews = reviews.sort((a, b) => {
-        return (
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+
+      reviews = [];
+
+      for (const rv1 of sortedReviews) {
+        if (
+          rv1.hidden === false &&
+          rv1.published === true &&
+          parseBody(rv1.body) &&
+          !reviews.find(
+            (rv2) => parseBody(rv2.body) && compareRatedId(rv1, rv2)
+          )
+        ) {
+          reviews.push(rv1);
+        }
+      }
+
+      if (req.query.sort && req.query.sort === "created_at") {
+        reviews = reviews.sort((a, b) => {
+          return (
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+        });
+      } else {
+        reviews = reviews.sort((a, b) => {
+          return (
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+        });
+      }
+
+      return res.json({
+        current_page: 1,
+        per_page: 9999,
+        reviews,
+        rating: req.query.rating,
+        count,
+        res_number: 3,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: `Get reviews ${external_id} (external_id) error`,
       });
     }
-
-    return res.json({
-      current_page: 1,
-      per_page: 9999,
-      reviews,
-    });
   }
 
   // createProxyMiddleware({

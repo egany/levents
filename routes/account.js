@@ -1,8 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const { parsePhoneNumber } = require("libphonenumber-js");
-const { createError, ERR_INVALID_ARGS, ERR_CONFLICT, ERR_LIMITED, ERR_NOT_FOUND, ERR_FORBIDDEN } =
-  require("../core").errors;
+const {
+  createError,
+  ERR_INVALID_ARGS,
+  ERR_CONFLICT,
+  ERR_LIMITED,
+  ERR_NOT_FOUND,
+  ERR_FORBIDDEN,
+} = require("../core").errors;
 const {
   generateOTP,
   helper,
@@ -15,6 +21,8 @@ const {
 const { shopify } = require("../lib");
 const { Session } = require("../model/session");
 const { ForgotEmail } = require("../model/forgot-email");
+const { default: axios } = require("axios");
+const { syncToJoy } = require("../core/helper");
 
 router.post("/forgot-email", _forgotEmail);
 
@@ -104,8 +112,8 @@ async function _forgotEmail(req, res) {
             message: `You have exceeded the allowed number of times, or try again in ${process.appSettings.otpBlockedHour} hours.`,
             viMessage: `Bạn đã vượt quá số lần cho phép, hãy thử lại sau ${process.appSettings.otpBlockedHour} tiếng.`,
             data: {
-              ..._forgotEmail
-            }
+              ..._forgotEmail,
+            },
           })
         );
         return res.status(403).json({ errors });
@@ -132,8 +140,8 @@ async function _forgotEmail(req, res) {
           message: `You have exceeded the allowed number of times, or try again in ${process.appSettings.otpBlockedHour} hours.`,
           viMessage: `Bạn đã vượt quá số lần cho phép, hãy thử lại sau ${process.appSettings.otpBlockedHour} tiếng.`,
           data: {
-            ..._forgotEmail
-          }
+            ..._forgotEmail,
+          },
         })
       );
       return res.status(403).json({ errors });
@@ -153,8 +161,8 @@ async function _forgotEmail(req, res) {
           message: "You can only make each request after 3 seconds.",
           viMessage: "Bạn chỉ có thể thực hiện mỗi yêu cầu sau 3 giây.",
           data: {
-            ..._forgotEmail
-          }
+            ..._forgotEmail,
+          },
         })
       );
       return res.status(403).json({ errors });
@@ -184,7 +192,7 @@ async function _forgotEmail(req, res) {
           message: "Account not found",
           viMessage: "Tài khoản này không tồn tại",
         })
-      )
+      );
 
       return res.status(404).json({ errors });
     }
@@ -198,7 +206,7 @@ async function _forgotEmail(req, res) {
           message: "Account not found",
           viMessage: "Tài khoản này không tồn tại",
         })
-      )
+      );
 
       return res.status(404).json({ errors });
     }
@@ -212,17 +220,17 @@ async function _forgotEmail(req, res) {
           message: "Email not found",
           viMessage: "Tài khoản này không có email",
         })
-      )
+      );
 
       return res.status(422).json({ errors });
     }
 
     await sendPhoneForgotEmail({ email: customer.email, phone: params.phone });
 
-    res.json({ message: "ok" })
+    res.json({ message: "ok" });
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ message: "errors" })
+    console.log(error);
+    res.status(500).json({ message: "errors" });
   }
 }
 
@@ -768,7 +776,7 @@ async function _handleNotClassicAccountExistsWithNotSameEmailAndPhone(
     ) {
       return next();
     }
-    
+
     const same =
       params.email === context.customer.email &&
       helper.comparePhoneNumber(params.phone, context.customer.phone);
@@ -1234,6 +1242,13 @@ async function _handleAccountNotExists(req, res, next) {
           context.customer.firstName,
           context.customer.lastName
         ) || params.fullName;
+
+      if (process.env.JOY_APP_ID && process.env.JOY_APP_SECRET) {
+        // Sync dateOfBirth to Joy
+        setTimeout(() => {
+          syncToJoy(params.dateOfBirth, context.customer.id);
+        }, 5000); // 3 minutes
+      }
     }
 
     const gsaaur = await shopify.generateAccountActivationUrl({
@@ -1333,13 +1348,13 @@ async function _verifyOTP(req, res, next) {
 
     let verifyOTPResult = params.otpPhone
       ? await verifyOTP({
-        phone: context.standardizedPhoneNumber,
-        OTP: params.otp,
-      })
+          phone: context.standardizedPhoneNumber,
+          OTP: params.otp,
+        })
       : await verifyOTP({
-        email: params.email,
-        OTP: params.otp,
-      });
+          email: params.email,
+          OTP: params.otp,
+        });
 
     if (verifyOTPResult.errors.length > 0) {
       verifyOTPResult.data = {
@@ -1594,11 +1609,11 @@ async function beginOTP(args) {
   try {
     const generateOTPResult = phone
       ? await generateOTP({
-        phone,
-      })
+          phone,
+        })
       : await generateOTP({
-        email,
-      });
+          email,
+        });
 
     if (generateOTPResult.errors.length > 0) {
       res.status(403).json(generateOTPResult);

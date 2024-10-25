@@ -2,6 +2,51 @@ const { parsePhoneNumber } = require("libphonenumber-js");
 const uuidv4 = require("uuid").v4;
 const { customAlphabet } = require("nanoid");
 const nanoid = customAlphabet("1234567890qwertyuiopasdfghjklzxcvbnm", 10);
+const { default: axios } = require("axios");
+
+function syncToJoy(dateOfBirth, customerId = "", retry = 0) {
+  console.log(getDateHCM(dateOfBirth));
+  axios
+    .post(
+      `https://joy.avada.io/integrate/customer/birthday/${customerId.replace(
+        "gid://shopify/Customer/",
+        ""
+      )}`,
+      { dateOfBirth: getDateHCM("1995-12-27") },
+      {
+        headers: {
+          "X-Joy-Loyalty-App-Key": process.env.JOY_APP_ID,
+          "X-Joy-Loyalty-Secret-Key": process.env.JOY_APP_SECRET,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((joyRes) => {
+      console.log(`Push dateOfBirth to Joy OK: `, joyRes.data);
+    })
+    .catch((joyErrorRes) => {
+      console.log(joyErrorRes.response.data);
+      console.log(joyErrorRes.response.status);
+      console.log(joyErrorRes.response.headers);
+
+      if (retry <= 3) {
+        setTimeout(() => {
+          syncToJoy(dateOfBirth, customerId, retry + 1);
+        }, 3000);
+      }
+    });
+}
+
+function getDateHCM(idate) {
+  // Define the timezone for Ho Chi Minh City
+  const timeZone = "Asia/Ho_Chi_Minh";
+
+  // Get the current date in Ho Chi Minh timezone
+  const date = new Date(idate).toISOString("en-CA", { timeZone });
+
+  // Extract just the date part in YYYY-MM-DD format
+  return date.split("T")[0];
+}
 
 /**
  * Normalize a port into a number, string, or false.
@@ -213,6 +258,8 @@ async function waitWithPromise(ms = 500) {
 }
 
 module.exports = {
+  syncToJoy,
+  getDateHCM,
   parseName,
   makeFullName,
   comparePhoneNumber,
