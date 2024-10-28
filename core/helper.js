@@ -12,7 +12,7 @@ function syncToJoy(dateOfBirth, customerId = "", retry = 0) {
         "gid://shopify/Customer/",
         ""
       )}`,
-      { dateOfBirth: getDateHCM("1995-12-27") },
+      { dateOfBirth: getDateHCM(dateOfBirth) },
       {
         headers: {
           "X-Joy-Loyalty-App-Key": process.env.JOY_APP_ID,
