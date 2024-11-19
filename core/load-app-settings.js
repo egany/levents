@@ -40,6 +40,9 @@ const {
   VIHAT_API_URL,
   VIHAT_API_KEY,
   VIHAT_SECRET_KEY,
+
+  JOY_APP_ID,
+  JOY_APP_SECRET
 } = process.env;
 
 process.appSettings = {
@@ -84,4 +87,7 @@ process.appSettings = {
   vihatApiUrl: VIHAT_API_URL,
   vihatApiKey: VIHAT_API_KEY,
   vihatSecretKey: VIHAT_SECRET_KEY,
+
+  joyAppKey: JOY_APP_ID,
+  joySecretKey: JOY_APP_SECRET
 };

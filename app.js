@@ -11,6 +11,7 @@ const judgeMeRouter = require("./routes/judge-me");
 const toolsRouter = require("./routes/tools");
 const discountRouter = require("./routes/discount");
 const odooRouter = require("./routes/odoo");
+const joyRouter = require("./routes/joy");
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use("/locations", locationRouter);
 app.use("/judge-me", judgeMeRouter);
 app.use("/discounts", discountRouter);
 app.use("/odoo", odooRouter);
+app.use("/joy-avada-io", joyRouter);
 
 if (process.env.API_TOOLS_ENABLE === "true") {
   app.use("/tools", toolsRouter);
